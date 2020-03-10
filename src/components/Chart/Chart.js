@@ -14,27 +14,29 @@ class Chart extends Component {
                   borderColor: 'rgb(54, 162, 235)',
                   backgroundColor: 'rgba(54, 162, 235, 0.2)',
                   pointRadius: 5,
-                  data: [
-                    { x: 0.30, y: 0.40},
-                    { x: 0.25, y: 0.30 },
-                    { x: 0.15, y: 0.25 },
-                    { x: 0.30, y: 0.30 },
-                    { x: 0.33, y: 0.42 }
-                  ],
+                  data: [],
                 },
                 {
                     label: 'Group B',
                     borderColor: 'rgb(255, 99, 132)',
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
                     pointRadius: 5,
-                    data: [
-                        { x: 0.45, y: 0.50},
-                        { x: 0.55, y: 0.55 },
-                        { x: 0.35, y: 0.25 },
-                        { x: 0.40, y: 0.50 },
-                        { x: 0.33, y: 0.40 },
-                    ]
-                  }, 
+                    data: []
+                },
+                {
+                    label: 'Centroid A',
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    pointRadius: 10,
+                    data: []
+                }, 
+                {
+                    label: 'Centroid B',
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    pointRadius: 10,
+                    data: []
+                },
               ]
           };
     }
@@ -43,26 +45,61 @@ class Chart extends Component {
         // We generate random points for group A and for group B
         let groupA = { ...this.state.datasets[0] };
         let groupB = { ...this.state.datasets[1] };
+        let centroidA = { ...this.state.datasets[2] };
+        let centroidB = { ...this.state.datasets[3] };
 
         let groupAPoints = [];
         let groupBPoints = [];
 
-        for ( let i=0; i<50; i++) {
-            groupAPoints.push({ x: Math.abs( Math.random() - 0.5 ).toFixed( 2 ), y: Math.abs( Math.random() - 0.5 ).toFixed(2)});
-            groupBPoints.push({ x: Math.abs( Math.random() + 0.5 ).toFixed( 2 ), y: Math.abs( Math.random() + 0.5 ).toFixed( 2 ) });
+        for ( let i=0; i<20; i++) {
+            groupAPoints.push({ x: parseFloat(Math.abs( Math.random() - 0.5 ).toFixed( 2 )), y: parseFloat(Math.abs( Math.random() - 0.5 ).toFixed( 2 )) });
+            groupBPoints.push({ x: parseFloat(Math.abs( Math.random() + 0.5 ).toFixed( 2 )), y: parseFloat(Math.abs( Math.random() + 0.5 ).toFixed( 2 )) });
         }
 
         groupA.data = groupAPoints;
         groupB.data = groupBPoints;
 
-        const newState = { datasets: [groupA, groupB] };
-    
+        // Get new centroid positions
+        centroidA.data = [this.getAveragePosition('A')];
+        centroidB.data = [this.getAveragePosition('B')];
+
+        const newState = { datasets: [ groupA, groupB, centroidA, centroidB ] };
+
         this.setState({ ...newState });
+    }
+
+    // This returns the average position of all points in a group
+    getAveragePosition = (group) => {
+        let points = {};
+
+        if (group == '') {
+            return {x: 0, y: 0};
+        }
+
+        if (group == 'A') {
+            points = this.state.datasets[0].data;
+        } else if (group == 'B') {
+            points = this.state.datasets[1].data;
+        }
+
+        // TODO: account for length 0 and 1
+        // We traverse each point, keeping track of the sums of the X and Y coordinates
+        let xSum = 0;
+        let ySum = 0;
+
+        points.forEach(point => {
+            xSum += point.x;
+            ySum += point.y;
+        });
+
+        // Then, we return a point that contains the average of all points in the team
+        return { x: ( xSum/points.length ).toFixed( 2 ), y: ( ySum/points.length ).toFixed( 2 ) };
     }
 
     render() {
         const options = {
             animation: {
+                duration: 2000,
                 easing: 'easeInOutCubic'
             }
           };
