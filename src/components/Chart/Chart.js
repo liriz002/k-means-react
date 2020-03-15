@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 //import {Scatter} from 'react-chartjs-2';
 import Chart from 'chart.js';
+import * as Constants from '../../constants/index';
+
 
 class MyChart extends Component {
     chartRef = React.createRef();
@@ -11,9 +13,8 @@ class MyChart extends Component {
     constructor(props) {
         super(props);
 
-        Chart.defaults.global.defaultFontFamily = 'Poppins';
+        Chart.defaults.global.defaultFontFamily = Constants.Global.FONT;
 
-        
 
         this.state = {
             doneClustering: false,
@@ -21,37 +22,37 @@ class MyChart extends Component {
             datasets: [
                 {
                   label: 'Group A',
-                  borderColor: 'rgb(54, 162, 235)',
-                  backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                  pointRadius: 10,
+                  borderColor: Constants.Colors.GROUP_A_BORDER,
+                  backgroundColor: Constants.Colors.GROUP_A_BACKGROUND,
+                  pointRadius: Constants.Chart.POINT_RADIUS,
                   data: []
                 },
                 {
                     label: 'Group B',
-                    borderColor: 'rgb(255, 99, 132)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    pointRadius: 10,
+                    borderColor: Constants.Colors.GROUP_B_BORDER,
+                    backgroundColor: Constants.Colors.GROUP_B_BACKGROUND,
+                    pointRadius: Constants.Chart.POINT_RADIUS,
                     data: []
                 },
                 {
                     label: 'Unassigned',
-                    borderColor: 'rgb(237,204,119)',
-                    backgroundColor: 'rgba(237, 204, 119, 0.2)',
-                    pointRadius: 10,
+                    borderColor: Constants.Colors.UNASSIGNED_BORDER,
+                    backgroundColor: Constants.Colors.UNASSIGNED_BACKGROUND,
+                    pointRadius: Constants.Chart.POINT_RADIUS,
                     data: []
                 },
                 {
                     label: 'Centroid A',
-                    borderColor: 'rgb(54, 162, 235)',
-                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                    pointRadius: 20,
+                    borderColor: Constants.Colors.CENTROID_A_BORDER,
+                    backgroundColor: Constants.Colors.CENTROID_A_BACKGROUND,
+                    pointRadius: Constants.Chart.CENTROID_RADIUS,
                     data: []
                 }, 
                 {
                     label: 'Centroid B',
-                    borderColor: 'rgb(255, 99, 132)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                    pointRadius: 20,
+                    borderColor: Constants.Colors.CENTROID_B_BORDER,
+                    backgroundColor: Constants.Colors.GROUP_B_BACKGROUND,
+                    pointRadius: Constants.Chart.CENTROID_RADIUS,
                     data: []
                 },
               ]
@@ -71,25 +72,25 @@ class MyChart extends Component {
                     scales: {
                       xAxes: [{
                           ticks: {
-                              max: 100,
-                              min: 0,
-                              stepSize: 10
+                              max: Constants.Chart.AXIS_MAX,
+                              min: Constants.Chart.AXIS_MIN,
+                              stepSize: Constants.Chart.AXIS_STEP
                           }
                       }
       
                       ],
                       yAxes: [{
                           ticks: {
-                              max: 125,
-                              min: 0,
-                              stepSize: 10
+                                max: Constants.Chart.AXIS_MAX,
+                              min: Constants.Chart.AXIS_MIN,
+                              stepSize: Constants.Chart.AXIS_STEP
                           }
                       }]
                   },
                   
                   animation: {
-                      duration: 500,
-                      easing: 'easeInOutCubic'
+                      duration: Constants.Chart.ANIMATION_DURATION,
+                      easing: Constants.Chart.ANIMATION_TYPE
                   }
               }
             //} 
@@ -104,11 +105,11 @@ class MyChart extends Component {
         // 2) Place 2 centroids (A and B) randomly
 
         // We start by generating random points for the unassigned group
-        prevState.datasets[2].data = this.generateRandomPoints(100, true);
+        prevState.datasets[2].data = this.generateRandomPoints(Constants.Global.NUM_OF_DATA_POINTS, true);
 
         // Then, we assign centroids A and B random positions
-        prevState.datasets[3].data = this.generateRandomPoints(1, false);
-        prevState.datasets[4].data = this.generateRandomPoints(1, false);
+        prevState.datasets[3].data = [prevState.datasets[2].data[0]]; // this.generateRandomPoints(1, false);
+        prevState.datasets[4].data = [prevState.datasets[2].data[1]]; // this.generateRandomPoints(1, false);
 
         // Finally, we update the state and the cart as well
         const newState = { doneClustering: false, currentStep: 0, datasets: [ ...prevState.datasets ] };
@@ -150,31 +151,27 @@ class MyChart extends Component {
             [groupA.data, groupB.data] = this.assignPointsToCentroids(points, centroidA, centroidB);
         } else {
             // Otherwise, we use points from A and B, so we merge all points
-            // points = [ ...groupA.data, ...groupB.data ];
-            
             // For both groups A and B, we traverse their points. If a point is closer to the centroid of the other group,
             // we remove it from one and add it on the other one
-            // TODO: iteration/deletion bug
-            console.log(groupA.data.slice(0));
-            groupA.data.forEach( ( point, index ) => {
-                if (this.getDistanceBetweenPoints( point, centroidB ) < this.getDistanceBetweenPoints( point, centroidA )) {
+            for ( let i=groupA.data.length-1; i>=0; i-- ) {
+                let point = groupA.data[i];
+
+                if ( this.getDistanceBetweenPoints( point, centroidB ) < this.getDistanceBetweenPoints( point, centroidA ) ) {
                     // The A point is closer to centroid B, so we remove it from group A and add it to group B
-                    
-                    console.log('A to B');
-                    groupB.data.push(groupA.data.splice(index, 1)[0]);
+                    groupB.data.push(groupA.data.splice(i, 1)[0]);
                     doneClustering = false;
                 }
-            });
+            }
 
-            groupB.data.forEach( ( point, index ) => {
-                if (this.getDistanceBetweenPoints( point, centroidA ) < this.getDistanceBetweenPoints( point, centroidB )) {
-                    // The A point is closer to centroid B, so we remove it from group A and add it to group B
-                    console.log('B to A');
-                    groupA.data.push(groupB.data.splice(index, 1)[0]);
+           for ( let i=groupB.data.length-1; i>=0; i-- ) {
+                let point = groupB.data[i];
+
+                if ( this.getDistanceBetweenPoints( point, centroidA ) < this.getDistanceBetweenPoints( point, centroidB ) ) {
+                    // The B point is closer to centroid A, so we remove it from group B and add it to group A
+                    groupA.data.push(groupB.data.splice(i, 1)[0]);
                     doneClustering = false;
                 }
-            });
-
+           }
         }
 
         // If we are still in the first (zeroth) step, we are obviously not done clustering
@@ -227,7 +224,7 @@ class MyChart extends Component {
             // We generate points in an orderly (somewhat linear) fashion (we allow x and y coordinates to be up to z points away in the positive direction for both)
             // logic here: https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript (i + 5 - i + 1) = (5+1) = (6)
             for ( let i=0; i<num; i++ ) {
-                points.push({ x: parseFloat( Math.abs( Math.random() * 10 + i ).toFixed( 2 ) ), y: parseFloat(Math.abs( Math.random() * 25 + i ).toFixed( 2 ) ) });
+                points.push({ x: parseFloat( Math.abs( Math.random() * Constants.Global.LINEAR_DATA_X_MULTIPLIER + i ).toFixed( 2 ) ), y: parseFloat(Math.abs( Math.random() * Constants.Global.LINEAR_DATA_Y_MULTIPLIER + i ).toFixed( 2 ) ) });
             }
         } else {
             // We generate points randomly
@@ -241,7 +238,6 @@ class MyChart extends Component {
 
     updateChart = () => {
         this.myChart.data.datasets = this.state.datasets;
-
         this.myChart.update();
     }
 
@@ -292,7 +288,8 @@ class MyChart extends Component {
           */
 
           if (this.state.doneClustering === true) {
-            alert('truly done');
+            // alert('truly done');
+            console.log('done');
           }
 
         return (
