@@ -1,12 +1,13 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import Chart from './components/Chart/Chart';
+import MyChart from './components/Chart/Chart';
 
 function App() {
   return (
     <div className="App">
-      <Chart />
+      <h1>K-means Clustering</h1>
+      <MyChart />
     </div>
   );
 }

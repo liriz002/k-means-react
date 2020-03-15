@@ -1,69 +1,119 @@
 import React, {Component} from 'react';
-import {Scatter} from 'react-chartjs-2';
+//import {Scatter} from 'react-chartjs-2';
+import Chart from 'chart.js';
 
-class Chart extends Component {
+class MyChart extends Component {
+    chartRef = React.createRef();
+    myChart;
+    
+
     // TODO: move to Redux
     constructor(props) {
         super(props);
 
-        this.state = {};
-    }
+        Chart.defaults.global.defaultFontFamily = 'Poppins';
 
-    initializeData = () => {
-        // We build the initial state using datasets
-        let initialState = {
+        
+
+        this.state = {
+            doneClustering: false,
             currentStep: 0,
             datasets: [
                 {
                   label: 'Group A',
                   borderColor: 'rgb(54, 162, 235)',
                   backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                  pointRadius: 5
+                  pointRadius: 10,
+                  data: []
                 },
                 {
                     label: 'Group B',
                     borderColor: 'rgb(255, 99, 132)',
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    pointRadius: 5
+                    pointRadius: 10,
+                    data: []
                 },
                 {
                     label: 'Unassigned',
                     borderColor: 'rgb(237,204,119)',
                     backgroundColor: 'rgba(237, 204, 119, 0.2)',
-                    pointRadius: 5
+                    pointRadius: 10,
+                    data: []
                 },
                 {
                     label: 'Centroid A',
                     borderColor: 'rgb(54, 162, 235)',
                     backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                    pointRadius: 12
+                    pointRadius: 20,
+                    data: []
                 }, 
                 {
                     label: 'Centroid B',
                     borderColor: 'rgb(255, 99, 132)',
                     backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                    pointRadius: 12
+                    pointRadius: 20,
+                    data: []
                 },
               ]
-          };
+        };
+    }
+
+    componentDidMount() {
+        // console.log(this.chartReference); // returns a Chart.js instance reference
+
+        const myChartRef = this.chartRef.current.getContext("2d");
+
+        this.myChart = new Chart(myChartRef, {
+            type: "scatter",
+            //data: {
+                datasets: [],
+                options: {
+                    scales: {
+                      xAxes: [{
+                          ticks: {
+                              max: 100,
+                              min: 0,
+                              stepSize: 10
+                          }
+                      }
+      
+                      ],
+                      yAxes: [{
+                          ticks: {
+                              max: 125,
+                              min: 0,
+                              stepSize: 10
+                          }
+                      }]
+                  },
+                  
+                  animation: {
+                      duration: 500,
+                      easing: 'easeInOutCubic'
+                  }
+              }
+            //} 
+        });
+      }
+
+    initializeData = () => {
+        let prevState = { ...this.state };
 
         // Then, we set the initial state of the data
         // 1) Generate random points for group A
         // 2) Place 2 centroids (A and B) randomly
 
-        // We start by generating random points for group A
-        //const datasetA = { ...initialState.datasets[2] };
-        initialState.datasets[2].data = this.generateRandomPoints(40);
+        // We start by generating random points for the unassigned group
+        prevState.datasets[2].data = this.generateRandomPoints(100, true);
 
-        // Then, we pick centroids based on 2 random points from the generated points
-        //const centroidA = { ...initialState.datasets[3] };
-        //const centroidB = { ...initialState.datasets[4] };
-        initialState.datasets[3].data = [{ ...initialState.datasets[2].data[0] }];
-        initialState.datasets[4].data = [{ ...initialState.datasets[2].data[1] }];
+        // Then, we assign centroids A and B random positions
+        prevState.datasets[3].data = this.generateRandomPoints(1, false);
+        prevState.datasets[4].data = this.generateRandomPoints(1, false);
 
-        console.log(initialState);
-        // const newState = { counter: this.state.counter + 1, datasets: [ datasetA, {}, centroidA, centroidB ] };
-        this.setState({ ...initialState });
+        // Finally, we update the state and the cart as well
+        const newState = { doneClustering: false, currentStep: 0, datasets: [ ...prevState.datasets ] };
+        this.setState( { newState } )
+       this.updateChart();
     }
 
     performStep = () => {
@@ -85,6 +135,7 @@ class Chart extends Component {
         let groupB = { ...this.state.datasets[1] };
         let centroidDatasetA = { ...this.state.datasets[3] };
         let centroidDatasetB = { ...this.state.datasets[4] };
+        let doneClustering = true; // is set to false if no points move from one group to the next
 
         // We start with 1 by calculating the distance of each point to all centroids
         // to assign the point to its closest centroid
@@ -94,26 +145,55 @@ class Chart extends Component {
 
              // We clear the unassigned points, as they are in the process of being assigned
              this.state.datasets[2].data = [];
+
+            // 1) We assign each point into its corresponding centroid
+            [groupA.data, groupB.data] = this.assignPointsToCentroids(points, centroidA, centroidB);
         } else {
             // Otherwise, we use points from A and B, so we merge all points
-            console.log('1+ step');
-            points = [ ...groupA.data, ...groupB.data ];
-            console.log(points);
+            // points = [ ...groupA.data, ...groupB.data ];
+            
+            // For both groups A and B, we traverse their points. If a point is closer to the centroid of the other group,
+            // we remove it from one and add it on the other one
+            // TODO: iteration/deletion bug
+            console.log(groupA.data.slice(0));
+            groupA.data.forEach( ( point, index ) => {
+                if (this.getDistanceBetweenPoints( point, centroidB ) < this.getDistanceBetweenPoints( point, centroidA )) {
+                    // The A point is closer to centroid B, so we remove it from group A and add it to group B
+                    
+                    console.log('A to B');
+                    groupB.data.push(groupA.data.splice(index, 1)[0]);
+                    doneClustering = false;
+                }
+            });
+
+            groupB.data.forEach( ( point, index ) => {
+                if (this.getDistanceBetweenPoints( point, centroidA ) < this.getDistanceBetweenPoints( point, centroidB )) {
+                    // The A point is closer to centroid B, so we remove it from group A and add it to group B
+                    console.log('B to A');
+                    groupA.data.push(groupB.data.splice(index, 1)[0]);
+                    doneClustering = false;
+                }
+            });
+
         }
 
-        // 1) We assign each point into its corresponding centroid
-        [groupA.data, groupB.data] = this.assignPointsToCentroids(points, centroidA, centroidB);
+        // If we are still in the first (zeroth) step, we are obviously not done clustering
+        if (this.state.currentStep == 0) {
+            doneClustering = false;
+        }
 
-        this.setState( { currentStep: this.state.currentStep + 1, datasets: [ groupA, groupB, { ...this.state.datasets[2] }, centroidDatasetA, centroidDatasetB ] } );
-        console.log(this.state);
+        this.setState( { doneClustering: doneClustering, currentStep: this.state.currentStep, datasets: [ groupA, groupB, { ...this.state.datasets[2] }, centroidDatasetA, centroidDatasetB ] } );
+
+        this.updateChart();
 
         setTimeout(() => {
         // 2) Reposition centroids based on the new average of all of its points
         centroidDatasetA.data = [this.getAveragePositionOfPoints(groupA.data)];
         centroidDatasetB.data = [this.getAveragePositionOfPoints(groupB.data)];
 
-        this.setState( { currentStep: this.state.currentStep + 1, datasets: [ groupA, groupB, { ...this.state.datasets[2] }, centroidDatasetA, centroidDatasetB ] } );
-        }, 2000);
+        this.setState( { doneClustering: doneClustering, currentStep: this.state.currentStep + 1, datasets: [ groupA, groupB, { ...this.state.datasets[2] }, centroidDatasetA, centroidDatasetB ] } );
+        this.updateChart();
+        }, 0);
     }
 
     // Traverses through a list of points, assigning points to the group of the centroid to which
@@ -140,54 +220,45 @@ class Chart extends Component {
         return Math.sqrt( Math.pow( ( pointB.x - pointA.x ), 2 ) + Math.pow( ( pointB.y - pointA.y ), 2 ) );
     }
     
-    generateRandomPoints = (num) => {
+    generateRandomPoints = (num, ordered) => {
         let points = [];
 
-        for ( let i=0; i<num; i++ ) {
-            points.push({ x: parseFloat( Math.abs( Math.random() ).toFixed( 2 ) * 100 ), y: parseFloat(Math.abs( Math.random() ).toFixed( 2 ) ) * 100 });
+        if (ordered) {
+            // We generate points in an orderly (somewhat linear) fashion (we allow x and y coordinates to be up to z points away in the positive direction for both)
+            // logic here: https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript (i + 5 - i + 1) = (5+1) = (6)
+            for ( let i=0; i<num; i++ ) {
+                points.push({ x: parseFloat( Math.abs( Math.random() * 10 + i ).toFixed( 2 ) ), y: parseFloat(Math.abs( Math.random() * 25 + i ).toFixed( 2 ) ) });
+            }
+        } else {
+            // We generate points randomly
+            for ( let i=0; i<num; i++ ) {
+                points.push({ x: parseFloat( Math.abs( Math.random() ).toFixed( 2 ) * 100 ), y: parseFloat(Math.abs( Math.random() ).toFixed( 2 ) ) * 100 });
+            }
         }
 
         return points;
     }
 
-    generateData = () => {
+    updateChart = () => {
+        this.myChart.data.datasets = this.state.datasets;
+
+        this.myChart.update();
+    }
+
+    // Continues each step until clustering is finished
+    performAutomatically = () => {
+        console.log('performing automatically');
+
         /*
-        let groupA = { ...this.state.datasets[0] };
-        let groupB = { ...this.state.datasets[1] };
-        let centroidA = { ...this.state.datasets[2] };
-        let centroidB = { ...this.state.datasets[3] };
-
-        let groupAPoints = this.generateRandomPoints(20);
-        let groupBPoints = this.generateRandomPoints(20);
-
-        
-        for ( let i=0; i<20; i++ ) {
-            groupAPoints.push({ x: parseFloat( Math.abs( Math.random() - 0.5 ).toFixed( 2 ) ), y: parseFloat(Math.abs( Math.random() - 0.5 ).toFixed( 2 )) });
-            groupBPoints.push({ x: parseFloat( Math.abs( Math.random() + 0.5 ).toFixed( 2 ) ), y: parseFloat(Math.abs( Math.random() + 0.5 ).toFixed( 2 )) });
+        while (!this.state.doneClustering ) {
+            setTimeout(() => {
+                console.log('performing...');
+                this.performStep();
+            }, 3000);
         }
-        
-
-        groupA.data = groupAPoints;
-        groupB.data = groupBPoints;
-
-        
-        if (this.state.counter == 2) {
-            let removedEl = groupAPoints.pop();
-            groupB.data.push({ x: 0.5, y: 0.5 });
-        }
-        
-
-        // Get new centroid positions
-        centroidA.data = [this.getAveragePositionOfPoints(groupAPoints)];
-        centroidB.data = [this.getAveragePositionOfPoints(groupBPoints)];
-
-        const newState = { counter: this.state.counter + 1, datasets: [ groupA, groupB, centroidA, centroidB ] };
-
-        this.setState({ ...newState });
-
-        console.log(this.state.counter);
         */
     }
+
 
     // This returns the average position of all points in a group
     getAveragePositionOfPoints = (points) => {
@@ -212,34 +283,6 @@ class Chart extends Component {
     }
 
     render() {
-        const options = {
-            scales: {
-                xAxes: [{
-                    ticks: {
-                        max: 100,
-                        min: 0,
-                        stepSize: 20
-                    }
-                }
-
-                ],
-                yAxes: [{
-                    ticks: {
-                        max: 100,
-                        min: 0,
-                        stepSize: 20
-                    }
-                }]
-            },
-            animation: {
-                duration: 2000,
-                easing: 'easeInOutCubic',
-                onProgress: function(animation) {
-                    console.log(animation);
-                }
-            }
-          };
-
           /*
           // TODO: later on, make conditional so that graph appears with data points with animation
           let scatter;
@@ -248,20 +291,28 @@ class Chart extends Component {
           }
           */
 
+          if (this.state.doneClustering === true) {
+            alert('truly done');
+          }
+
         return (
             <div>
                 <div className="Chart">
-                 <Scatter data={this.state} options={options} />
+                 <canvas 
+                    id="myChart"
+                    ref={this.chartRef}
+                    />
                 </div>
                 <button onClick={this.initializeData}>Randomize</button>
                 <button onClick={this.performStep}>Perform Step</button>
+                <button onClick={this.performAutomatically}>Automatic</button>
             </div>
         );
     }
 }
 
 /*
-
+<Scatter ref={ref => this.chartReference = ref} data={this.state} options={options} />
 https://www.youtube.com/watch?v=_aWzGGNrcic
 
 K-means clustering 
@@ -284,4 +335,4 @@ Repeat until convergence:
 
 */
 
-export default Chart;
+export default MyChart;
