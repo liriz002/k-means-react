@@ -25,6 +25,7 @@ class MyChart extends Component {
                   borderColor: Constants.Colors.GROUP_A_BORDER,
                   backgroundColor: Constants.Colors.GROUP_A_BACKGROUND,
                   pointRadius: Constants.Chart.POINT_RADIUS,
+                  pointStyle: 'circle',
                   data: []
                 },
                 {
@@ -32,6 +33,7 @@ class MyChart extends Component {
                     borderColor: Constants.Colors.GROUP_B_BORDER,
                     backgroundColor: Constants.Colors.GROUP_B_BACKGROUND,
                     pointRadius: Constants.Chart.POINT_RADIUS,
+                    pointStyle: 'circle',
                     data: []
                 },
                 {
@@ -46,6 +48,8 @@ class MyChart extends Component {
                     borderColor: Constants.Colors.CENTROID_A_BORDER,
                     backgroundColor: Constants.Colors.CENTROID_A_BACKGROUND,
                     pointRadius: Constants.Chart.CENTROID_RADIUS,
+                    pointStyle: 'crossRot',
+                    borderWidth: 5,
                     data: []
                 }, 
                 {
@@ -53,6 +57,8 @@ class MyChart extends Component {
                     borderColor: Constants.Colors.CENTROID_B_BORDER,
                     backgroundColor: Constants.Colors.GROUP_B_BACKGROUND,
                     pointRadius: Constants.Chart.CENTROID_RADIUS,
+                    pointStyle: 'crossRot',
+                    borderWidth: 5,
                     data: []
                 },
               ]
@@ -72,7 +78,7 @@ class MyChart extends Component {
                     scales: {
                       xAxes: [{
                           ticks: {
-                              max: Constants.Chart.AXIS_MAX,
+                              max: Constants.Chart.AXIS_MAX - 10,
                               min: Constants.Chart.AXIS_MIN,
                               stepSize: Constants.Chart.AXIS_STEP
                           }
@@ -81,7 +87,7 @@ class MyChart extends Component {
                       ],
                       yAxes: [{
                           ticks: {
-                                max: Constants.Chart.AXIS_MAX,
+                              max: Constants.Chart.AXIS_MAX,
                               min: Constants.Chart.AXIS_MIN,
                               stepSize: Constants.Chart.AXIS_STEP
                           }
@@ -108,8 +114,31 @@ class MyChart extends Component {
         prevState.datasets[2].data = this.generateRandomPoints(Constants.Global.NUM_OF_DATA_POINTS, true);
 
         // Then, we assign centroids A and B random positions
-        prevState.datasets[3].data = [prevState.datasets[2].data[0]]; // this.generateRandomPoints(1, false);
-        prevState.datasets[4].data = [prevState.datasets[2].data[1]]; // this.generateRandomPoints(1, false);
+        // To do that, we will get 2 distinct random points from the created points. We then find
+        // 2 numbers in [0, # of points - 1]
+        // We use this logic: https://stackoverflow.com/a/7228322/3659145
+        let randomA = -1;
+        let randomB = -1;
+
+        // We do a while loop to ensure that randomA and randomB are different
+        while (randomB == -1) {
+            // First, we assign a random number to random A if needed
+            if (randomA == -1) {
+                randomA = Math.floor( ( Math.random() * ( prevState.datasets[2].data.length - 1 ) ));
+            }
+
+            // We generate a second random number for B
+            let tempB = Math.floor( ( Math.random() * ( prevState.datasets[2].data.length - 1 ) ) );
+
+            // If it's different than randomA, we assign it to randomA then
+            if (randomA != tempB) {
+                randomB = tempB;
+            }
+        }
+
+        // We assign the centroids to the correct positions
+        prevState.datasets[3].data = [ prevState.datasets[2].data[randomA] ]; // this.generateRandomPoints(1, false);
+        prevState.datasets[4].data = [ prevState.datasets[2].data[randomB] ]; // this.generateRandomPoints(1, false);
 
         // Finally, we update the state and the cart as well
         const newState = { doneClustering: false, currentStep: 0, datasets: [ ...prevState.datasets ] };
@@ -243,16 +272,27 @@ class MyChart extends Component {
 
     // Continues each step until clustering is finished
     performAutomatically = () => {
-        console.log('performing automatically');
-
-        /*
-        while (!this.state.doneClustering ) {
-            setTimeout(() => {
-                console.log('performing...');
-                this.performStep();
-            }, 3000);
+        // TODO if you randomize and then perform automatically, it randomizes one more time.
+        // Change if I will keep all these buttons
+        // We perform a step immediately
+        if (this.state.currentStep == 0) {
+            this.initializeData();
+        } else {
+            this.performStep();
         }
-        */
+
+        // Then, we set up an interval that performs steps every certain time
+        let intervalID = window.setInterval(() => {
+
+            // If there are no more steps, we stop the interval
+            if (this.state.doneClustering === true) {
+                clearInterval(intervalID);
+
+                return;
+            }
+
+            this.performStep();
+        }, Constants.Global.AUTOMATIC_STEPS_INTERVAL);
     }
 
 
