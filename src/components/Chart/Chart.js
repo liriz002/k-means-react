@@ -2,13 +2,13 @@ import React, {Component} from 'react';
 //import {Scatter} from 'react-chartjs-2';
 import Chart from 'chart.js';
 import * as Constants from '../../constants/index';
+import Button from '../UI/Button/Button';
 
 
 class MyChart extends Component {
     chartRef = React.createRef();
     myChart;
     
-
     // TODO: move to Redux
     constructor(props) {
         super(props);
@@ -75,6 +75,7 @@ class MyChart extends Component {
             //data: {
                 datasets: [],
                 options: {
+                    
                     scales: {
                       xAxes: [{
                           ticks: {
@@ -282,11 +283,11 @@ class MyChart extends Component {
         }
 
         // Then, we set up an interval that performs steps every certain time
-        let intervalID = window.setInterval(() => {
+        let stepInterval = window.setInterval(() => {
 
             // If there are no more steps, we stop the interval
             if (this.state.doneClustering === true) {
-                clearInterval(intervalID);
+                clearInterval(stepInterval);
 
                 return;
             }
@@ -296,10 +297,8 @@ class MyChart extends Component {
     }
 
 
-    // This returns the average position of all points in a group
+    // This returns the average position of all points in a cluster
     getAveragePositionOfPoints = (points) => {
-
-
         if (points.length == 0) {
             return { x: 0, y: 0 };
         }
@@ -340,9 +339,14 @@ class MyChart extends Component {
                     ref={this.chartRef}
                     />
                 </div>
-                <button onClick={this.initializeData}>Randomize</button>
-                <button onClick={this.performStep}>Perform Step</button>
-                <button onClick={this.performAutomatically}>Automatic</button>
+                <Button 
+                    title="Single Step"
+                    class="Button Button1"
+                    clicked={ this.initializeData } />
+                <Button 
+                    title="All Steps"
+                    class="Button Button2"
+                    clicked={ this.performAutomatically } />
             </div>
         );
     }

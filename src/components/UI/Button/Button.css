@@ -1,0 +1,49 @@
+/* This is not really modular, as it applies changes to the whole project */
+.Button {
+    font-size: 16px;
+    font-family: 'Quicksand';
+    font-weight: bold;
+    padding: 10px 15px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition-duration: 0.6s;
+    margin: 0 5px;
+    width: 150px;
+}
+
+.Button:active {
+    box-shadow: 0 2px #666;
+    transform: translateY(4px);
+}
+
+.Button:focus {
+    outline: 0 !important;
+}
+
+.Button:hover {
+    transform: translateY(-2px);
+}
+
+.Button1 {
+    background-color: white;
+    color: #53f;
+    border: 2px solid #53f;
+}
+
+.Button1:hover {
+    background-color: #53f;
+    color: white;
+    /* green #3ecf8e */
+}
+
+.Button2 {
+    background-color: white;
+    color: #718B91;
+    border: 2px solid #718B91;
+}
+
+.Button2:hover {
+    background-color: #718B91;
+    color: white;
+}

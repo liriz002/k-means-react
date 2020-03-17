@@ -1,5 +1,5 @@
 export const Global = {
-    FONT: 'Poppins',
+    FONT: 'Quicksand',
     NUM_OF_DATA_POINTS: 100,
     LINEAR_DATA_X_MULTIPLIER: 10,
     LINEAR_DATA_Y_MULTIPLIER: 20,
@@ -23,7 +23,7 @@ export const Chart = {
     POINT_RADIUS : 10,
     CENTROID_RADIUS : 25,
     ANIMATION_DURATION: 1000,
-    ANIMATION_TYPE: 'easeInOutCubic',
+    ANIMATION_TYPE: 'easeInOutQuart',
     AXIS_MIN: 0,
     AXIS_MAX: 120,
     AXIS_STEP: 10
