@@ -25,25 +25,39 @@
     transform: translateY(-2px);
 }
 
+.Button:disabled, .Button:disabled:hover {
+    background-color: white;
+    border-color: grey;
+    color: grey;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.hide {
+    display: none;
+}
+
 .Button1 {
     background-color: white;
-    color: #53f;
-    border: 2px solid #53f;
+    color: #3ecf8e;
+    border: 2px solid #3ecf8e;
 }
 
 .Button1:hover {
-    background-color: #53f;
+    background-color: #3ecf8e;
     color: white;
     /* green #3ecf8e */
 }
 
 .Button2 {
     background-color: white;
-    color: #718B91;
-    border: 2px solid #718B91;
+    color: #53f;
+    border: 2px solid #53f;
+
 }
 
 .Button2:hover {
-    background-color: #718B91;
+    background-color: #53f;
     color: white;
+
 }

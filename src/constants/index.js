@@ -28,3 +28,15 @@ export const Chart = {
     AXIS_MAX: 120,
     AXIS_STEP: 10
 };
+
+export const ApplicationStates = {
+    BEGIN: 0,
+    RANDOMIZE: 1,
+    STEPS: 2,
+    FINISH: 3
+}
+
+export const ReactMotion = {
+    BTN_STIFFNESS: 60,
+    BTN_DAMPING: 7
+}

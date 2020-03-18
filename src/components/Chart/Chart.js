@@ -3,6 +3,8 @@ import React, {Component} from 'react';
 import Chart from 'chart.js';
 import * as Constants from '../../constants/index';
 import Button from '../UI/Button/Button';
+import { Motion, spring } from 'react-motion';
+
 
 
 class MyChart extends Component {
@@ -14,9 +16,8 @@ class MyChart extends Component {
         super(props);
 
         Chart.defaults.global.defaultFontFamily = Constants.Global.FONT;
-
-
         this.state = {
+            applicationState: Constants.ApplicationStates.BEGIN,
             doneClustering: false,
             currentStep: 0,
             datasets: [
@@ -159,68 +160,72 @@ class MyChart extends Component {
         // 2) Re-position the centroids according to the average position of all its points
 
         // Declare some variables
+        let newState = { ...this.state };
         let points;
-        let centroidA = this.state.datasets[3].data[0];
-        let centroidB = this.state.datasets[4].data[0];
-        let groupA = { ...this.state.datasets[0] };
-        let groupB = { ...this.state.datasets[1] };
-        let centroidDatasetA = { ...this.state.datasets[3] };
-        let centroidDatasetB = { ...this.state.datasets[4] };
+        let centroidA = newState.datasets[3].data[0];
+        let centroidB = newState.datasets[4].data[0];
         let doneClustering = true; // is set to false if no points move from one group to the next
 
         // We start with 1 by calculating the distance of each point to all centroids
         // to assign the point to its closest centroid
         // We first check if this is the first assignment. If so, we'll get all points from dataset C (unassigned)
-        if (this.state.currentStep == 0) {
-             points = this.state.datasets[2].data;
+        if (newState.currentStep == 0) {
+             points = newState.datasets[2].data;
 
              // We clear the unassigned points, as they are in the process of being assigned
-             this.state.datasets[2].data = [];
+             newState.datasets[2].data = [];
 
             // 1) We assign each point into its corresponding centroid
-            [groupA.data, groupB.data] = this.assignPointsToCentroids(points, centroidA, centroidB);
+            [newState.datasets[0].data, newState.datasets[1].data] = this.assignPointsToCentroids(points, centroidA, centroidB);
         } else {
             // Otherwise, we use points from A and B, so we merge all points
             // For both groups A and B, we traverse their points. If a point is closer to the centroid of the other group,
             // we remove it from one and add it on the other one
-            for ( let i=groupA.data.length-1; i>=0; i-- ) {
-                let point = groupA.data[i];
+            for ( let i=newState.datasets[0].data.length-1; i>=0; i-- ) {
+                let point = newState.datasets[0].data[i];
 
                 if ( this.getDistanceBetweenPoints( point, centroidB ) < this.getDistanceBetweenPoints( point, centroidA ) ) {
                     // The A point is closer to centroid B, so we remove it from group A and add it to group B
-                    groupB.data.push(groupA.data.splice(i, 1)[0]);
+                    newState.datasets[1].data.push(newState.datasets[0].data.splice(i, 1)[0]);
                     doneClustering = false;
                 }
             }
 
-           for ( let i=groupB.data.length-1; i>=0; i-- ) {
-                let point = groupB.data[i];
+           for ( let i=newState.datasets[1].data.length-1; i>=0; i-- ) {
+                let point = newState.datasets[1].data[i];
 
                 if ( this.getDistanceBetweenPoints( point, centroidA ) < this.getDistanceBetweenPoints( point, centroidB ) ) {
                     // The B point is closer to centroid A, so we remove it from group B and add it to group A
-                    groupA.data.push(groupB.data.splice(i, 1)[0]);
+                    newState.datasets[0].data.push(newState.datasets[1].data.splice(i, 1)[0]);
                     doneClustering = false;
                 }
            }
         }
 
         // If we are still in the first (zeroth) step, we are obviously not done clustering
-        if (this.state.currentStep == 0) {
+        if (newState.currentStep == 0) {
             doneClustering = false;
         }
 
-        this.setState( { doneClustering: doneClustering, currentStep: this.state.currentStep, datasets: [ groupA, groupB, { ...this.state.datasets[2] }, centroidDatasetA, centroidDatasetB ] } );
+        newState.doneClustering = doneClustering;
+
+        this.setState( { ...newState } );
+        console.log(this.state);
 
         this.updateChart();
 
         setTimeout(() => {
         // 2) Reposition centroids based on the new average of all of its points
-        centroidDatasetA.data = [this.getAveragePositionOfPoints(groupA.data)];
-        centroidDatasetB.data = [this.getAveragePositionOfPoints(groupB.data)];
+        newState.datasets[3].data = [this.getAveragePositionOfPoints(newState.datasets[0].data)];
+        newState.datasets[4].data = [this.getAveragePositionOfPoints(newState.datasets[1].data)];
 
-        this.setState( { doneClustering: doneClustering, currentStep: this.state.currentStep + 1, datasets: [ groupA, groupB, { ...this.state.datasets[2] }, centroidDatasetA, centroidDatasetB ] } );
+        newState.currentStep += 1;
+
+        this.setState( { ...newState } );
         this.updateChart();
         }, 0);
+
+        console.log(this.state);
     }
 
     // Traverses through a list of points, assigning points to the group of the centroid to which
@@ -273,14 +278,8 @@ class MyChart extends Component {
 
     // Continues each step until clustering is finished
     performAutomatically = () => {
-        // TODO if you randomize and then perform automatically, it randomizes one more time.
-        // Change if I will keep all these buttons
         // We perform a step immediately
-        if (this.state.currentStep == 0) {
-            this.initializeData();
-        } else {
-            this.performStep();
-        }
+        this.performStep();
 
         // Then, we set up an interval that performs steps every certain time
         let stepInterval = window.setInterval(() => {
@@ -317,14 +316,65 @@ class MyChart extends Component {
         return { x: ( xSum/points.length ).toFixed( 2 ), y: ( ySum/points.length ).toFixed( 2 ) };
     }
 
+    // Moves to the next state
+    advanceState = () => {
+        let prevState = { ...this.state };
+        prevState.applicationState += 1;
+        this.setState({ ...prevState });
+    }
+
     render() {
-          /*
-          // TODO: later on, make conditional so that graph appears with data points with animation
-          let scatter;
-          if (this.state.currentStep) {
-              scatter = <Scatter data={this.state} options={options} />
-          }
-          */
+        let btn1Props = {};
+        let btn2Props = {};
+        let button1Classes = "Button Button1";
+        let button2Classes = "Button Button2";
+        let btnStyle = { opacity: 0 };
+        let btnDefaultStyle = { opacity: spring(1 , { stiffness: Constants.ReactMotion.BTN_STIFFNESS, damping: Constants.ReactMotion.BTN_DAMPING })};
+        
+        // Creates properties for buttons depending on the application state we're in
+        switch( this.state.applicationState ) {
+            case Constants.ApplicationStates.BEGIN:
+                btn1Props = {
+                    title: "Begin",
+                    classes: button1Classes,
+                    clickFn: this.advanceState
+                }
+
+                btn2Props = {
+                    title: "",
+                    classes: "hide",
+                    clickFn: (() =>{})
+                }
+                break;
+
+            case Constants.ApplicationStates.RANDOMIZE:
+                btn1Props = {
+                    title: "Shuffle Data",
+                    classes: button1Classes,
+                    clickFn: this.initializeData
+                }
+
+                btn2Props = {
+                    title: "Continue",
+                    classes: button2Classes,
+                    clickFn: this.advanceState
+                }
+                break;
+
+            case Constants.ApplicationStates.STEPS:
+                btn1Props = {
+                    title: "Manual Step",
+                    classes: button1Classes,
+                    clickFn: this.performStep
+                }
+
+                btn2Props = {
+                    title: "All Steps",
+                    classes: button2Classes,
+                    clickFn: this.performAutomatically
+                }
+            break;
+            }
 
           if (this.state.doneClustering === true) {
             // alert('truly done');
@@ -332,21 +382,35 @@ class MyChart extends Component {
           }
 
         return (
-            <div>
+            <div>                
                 <div className="Chart">
                  <canvas 
                     id="myChart"
                     ref={this.chartRef}
                     />
-                </div>
-                <Button 
-                    title="Single Step"
-                    class="Button Button1"
-                    clicked={ this.initializeData } />
-                <Button 
-                    title="All Steps"
-                    class="Button Button2"
-                    clicked={ this.performAutomatically } />
+                </div> 
+
+                <Motion key={ this.state.applicationState + '_' + '1' } defaultStyle={ btnStyle } style={ btnDefaultStyle }>
+                { style => (
+                    <Button 
+                        style={{ opacity: style.opacity }}
+                        title={ btn1Props.title }
+                        className={ btn1Props.classes }
+                        clicked={ btn1Props.clickFn }
+                    />
+                )}
+                </Motion>
+
+                <Motion key={ this.state.applicationState + '_' + '2' } defaultStyle={ btnStyle } style={ btnDefaultStyle }>
+                { style => (
+                    <Button 
+                        style={{ opacity: style.opacity }}
+                        title={ btn2Props.title }
+                        className={ btn2Props.classes }
+                        clicked={ btn2Props.clickFn }
+                    />
+                )}
+                </Motion>
             </div>
         );
     }
