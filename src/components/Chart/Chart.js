@@ -105,6 +105,10 @@ class MyChart extends Component {
         });
       }
 
+      printState = () => {
+        console.log(this.state);
+      }
+
     initializeData = () => {
         let prevState = { ...this.state };
 
@@ -143,8 +147,7 @@ class MyChart extends Component {
         prevState.datasets[4].data = [ prevState.datasets[2].data[randomB] ]; // this.generateRandomPoints(1, false);
 
         // Finally, we update the state and the cart as well
-        const newState = { doneClustering: false, currentStep: 0, datasets: [ ...prevState.datasets ] };
-        this.setState( { newState } )
+        this.setState({ ...prevState });
        this.updateChart();
     }
 
@@ -210,19 +213,17 @@ class MyChart extends Component {
         newState.doneClustering = doneClustering;
 
         this.setState( { ...newState } );
-        console.log(this.state);
-
         this.updateChart();
 
         setTimeout(() => {
-        // 2) Reposition centroids based on the new average of all of its points
-        newState.datasets[3].data = [this.getAveragePositionOfPoints(newState.datasets[0].data)];
-        newState.datasets[4].data = [this.getAveragePositionOfPoints(newState.datasets[1].data)];
+            // 2) Reposition centroids based on the new average of all of its points
+            newState.datasets[3].data = [this.getAveragePositionOfPoints(newState.datasets[0].data)];
+            newState.datasets[4].data = [this.getAveragePositionOfPoints(newState.datasets[1].data)];
 
-        newState.currentStep += 1;
+            newState.currentStep += 1;
 
-        this.setState( { ...newState } );
-        this.updateChart();
+            this.setState( { ...newState } );
+            this.updateChart();
         }, 0);
 
         console.log(this.state);
@@ -278,6 +279,11 @@ class MyChart extends Component {
 
     // Continues each step until clustering is finished
     performAutomatically = () => {
+        // TODO: here we advance to the next application state, but ensure this cannot be called
+        // if the user is FINISHED (buttons are blocked)
+        //this.advanceState();
+
+
         // We perform a step immediately
         this.performStep();
 
@@ -330,7 +336,8 @@ class MyChart extends Component {
         let button2Classes = "Button Button2";
         let btnStyle = { opacity: 0 };
         let btnDefaultStyle = { opacity: spring(1 , { stiffness: Constants.ReactMotion.BTN_STIFFNESS, damping: Constants.ReactMotion.BTN_DAMPING })};
-        
+        let isDisabled = false;
+
         // Creates properties for buttons depending on the application state we're in
         switch( this.state.applicationState ) {
             case Constants.ApplicationStates.BEGIN:
@@ -359,6 +366,11 @@ class MyChart extends Component {
                     classes: button2Classes,
                     clickFn: this.advanceState
                 }
+
+                if (this.state.datasets[2].data.length == 0) {
+                    isDisabled = true;
+                }
+
                 break;
 
             case Constants.ApplicationStates.STEPS:
@@ -376,8 +388,8 @@ class MyChart extends Component {
             break;
             }
 
+            // TODO: possibly use this as an application state instead
           if (this.state.doneClustering === true) {
-            // alert('truly done');
             console.log('done');
           }
 
@@ -408,6 +420,7 @@ class MyChart extends Component {
                         title={ btn2Props.title }
                         className={ btn2Props.classes }
                         clicked={ btn2Props.clickFn }
+                        disabled = { isDisabled }
                     />
                 )}
                 </Motion>
