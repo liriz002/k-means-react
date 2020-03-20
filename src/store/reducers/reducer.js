@@ -22,10 +22,10 @@ const initialData = {
     datasets: []
 }
 
-const chartData = ( state = initialData, action ) => {
+const data = ( state = initialData, action ) => {
     switch (action.type) {
         case Actions.INITIALIZE_CHART_DATA:
-            return { ...state, datasets: [ ...action.datasets ] };
+            return { ...state, datasets: [ ...action.chartData ] };
         default:
             return state;
     }
@@ -33,7 +33,7 @@ const chartData = ( state = initialData, action ) => {
 
 const kMeansApp = combineReducers({
     globalProps,
-    chartData
+    data
 });
 
 export default kMeansApp;

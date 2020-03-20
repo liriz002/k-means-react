@@ -60,53 +60,131 @@ class MyChart extends Component {
         });
       }
 
-    // Initializes the data in the cart
+    // Initializes (or shuffles) the data in the cart
     initializeData = () => {
-        const datasets = [];
+        const datasets = [ ...this.props.datasets ];
 
         // We start off by generating the points for the chart for the unassigned category
         const points = this.generateRandomPoints(Constants.Global.NUM_OF_DATA_POINTS, true);
 
-        // For each cluster we have, we:
-        // 1) Push a dataset for the points associated with the cluster
-        // 2) Push a dataset for the cluster itself, setting a random position for it
+        // Then, we check whether we are initializing data or shuffling existing data
+        if ( datasets.length == 0 ) {
+            // We are initializing data. For each cluster we have, we:
+            // 1) Push a dataset for the points associated with the cluster
+            // 2) Push a dataset for the cluster itself, setting a random position for it
+            for ( let i=0; i<this.props.totalClusters; i++ ) {
+                // 1) We get the corresponding group dataset and initialize the data as an empty array
+                const groupDataset = { ...Constants.Styles.Group[ i ] };
+                groupDataset.data = [];
+    
+                // 2) And then the corresponding centroid dataset
+                const centroidDataset = { ...Constants.Styles.Centroid[ i ]  };
+    
+                // We give the centroid a starting position based on an existing points
+                // TODO: maybe have this so that they're always different for each point
+                centroidDataset.data = [ points[ Math.floor( Math.random() * ( points.length - 1 ) ) ] ];
+    
+                // Finally, we push both the group and centroid datasets
+                datasets.push( groupDataset, centroidDataset );
+            }
+    
+            // Finally, we push push an unassigned dataset which will contain all the points initially
+            const unassignedDataset = { ...Constants.Styles.Unassigned[0] };
+            unassignedDataset.data = points;
+            datasets.push( unassignedDataset );
+        } else {
+            // We are shuffling data instead, so we update the datasets accordingly:
+            // First, for each centroid, we get a new random point
+            // (centroids are always at uneven positions, so we start a 1 and advance by 2)
+            for ( let j=1; j<datasets.length; j=j+2 )  {
+                datasets[j].data = [ points[ Math.floor( Math.random() * ( points.length - 1 ) ) ] ];
+            }
 
-        for ( let i=0; i<this.props.totalClusters; i++ ) {
-            // We get the corresponding group dataset and initialize the data as an empty array
-            const groupDataset = { ...Constants.Styles.Group[ i ] };
-            groupDataset.data = [];
-
-            // And then the corresponding centroid dataset
-            const centroidDataset = { ...Constants.Styles.Centroid[ i ]  };
-
-            // We give the centroid a starting position based on an existing points
-            // TODO: maybe have this so that they're always different for each point
-            centroidDataset.data = [ points[ Math.floor( Math.random() * ( points.length - 1 ) ) ] ];
-
-            // Finally, we push both the group and centroid datasets
-            datasets.push( groupDataset, centroidDataset );
+            // Finally, we get new unassigned points
+            // (the unassigned set is the last dataset, so it's at position [ num clusters * 2 ])
+            let unassignedDataset = datasets[ Constants.Global.INITIAL_TOTAL_CLUSTERS * 2 ];
+            unassignedDataset.data = points;
         }
 
-        // Finally, we push push an unassigned dataset which will contain all the points initially
-        const unassignedDataset = { ...Constants.Styles.Unassigned[0] };
-        unassignedDataset.data = points;
-        datasets.push( unassignedDataset );
-
-        // We store this initial data
+        // We store this data with the reducer
         this.props.onInitializeChartData( datasets );
     }
 
+    // Performs a step of the algorithm
     performStep = () => {
-        if (this.state.currentStep === undefined) {
+        if (this.props.datasets.length == 0) {
             alert('There\'s no data to work with!');
 
             return;
         }
 
+        let datasets = [ ...this.props.datasets ];
+
         // We perform a step of the k-means algorithm, which involves two things:
         // 1) Assign each point to its closest centroid
-        // 2) Re-position the centroids according to the average position of all its points
+        // 2) Re-position the centroids according to the average position of all its corresponding points
 
+        // We start with 1) by calculating the distance of each point to all centroids
+        // to assign the point to its closest centroid
+        let points = [];
+
+        // We first check if this is the first assignment
+        if ( datasets[0].data.length == 0 ) {
+            // If so, we'll get all points from the unassigned dataset
+            points = [ ...datasets[ Constants.Global.INITIAL_TOTAL_CLUSTERS * 2 ].data ];
+
+            // We clear the unassigned points, as they are in the process of being assigned
+            datasets[ Constants.Global.INITIAL_TOTAL_CLUSTERS * 2 ].data = [];
+        } else {
+            // Otherwise, it's not the first assignment, so we get points by merging points
+            // from all groups together
+            for ( let j=0; j<datasets.length; j=j+2 ) {
+                points = [...points, ...datasets[ j ].data ];
+            }
+        }
+
+        // In any case, we get all the points with their corresponding centroid assignments
+        // and store them in the appropriate group. Also, we reposition the centroids
+        let orderedPoints = this.assignPointsToCentroids( points );
+
+        for ( let i=0; i<orderedPoints.length; i++ ) {
+            // We assign the points to the correct group
+            datasets[ i * 2 ].data = orderedPoints [ i ];
+
+            // Then we reposition the centroids
+            datasets[ ( i * 2 ) + 1 ].data = [ this.getAveragePositionOfPoints( orderedPoints[ i ] ) ]; 
+        }
+
+        // Then, we move on to step 2, in which we reposition the centroids
+        setTimeout(() => {
+            // For each centroid, we get the average position and assign it to its data
+            /*
+            for ( let k=1; k<datasets.length; k=k+2 ) {
+                k[  ] = [ this.getAveragePositionOfPoints ]
+            }
+            */
+
+            /*
+            // 2) Reposition centroids based on the new average of all of its points
+            newState.datasets[3].data = [this.getAveragePositionOfPoints(newState.datasets[0].data)];
+            newState.datasets[4].data = [this.getAveragePositionOfPoints(newState.datasets[1].data)];
+
+            newState.currentStep += 1;
+
+            this.setState( { ...newState } );
+            this.updateChart();
+            */
+        }, 0);
+
+
+
+
+
+
+
+        this.props.onInitializeChartData( datasets );
+
+        /*
         // Declare some variables
         let newState = { ...this.state };
         let points;
@@ -114,13 +192,12 @@ class MyChart extends Component {
         let centroidB = newState.datasets[4].data[0];
         let doneClustering = true; // is set to false if no points move from one group to the next
 
-        // We start with 1 by calculating the distance of each point to all centroids
-        // to assign the point to its closest centroid
-        // We first check if this is the first assignment. If so, we'll get all points from dataset C (unassigned)
+       
+       
         if (newState.currentStep == 0) {
              points = newState.datasets[2].data;
 
-             // We clear the unassigned points, as they are in the process of being assigned
+             
              newState.datasets[2].data = [];
 
             // 1) We assign each point into its corresponding centroid
@@ -170,26 +247,52 @@ class MyChart extends Component {
             this.setState( { ...newState } );
             this.updateChart();
         }, 0);
-
+        */
     }
+    
 
     // Traverses through a list of points, assigning points to the group of the centroid to which
-    // they are closest to (either A or B), returning the points in the form of two arrays
-    assignPointsToCentroids = (points, centroidA, centroidB) => {
-        let groupA = [];
-        let groupB = [];
+    // they are closest to, returning the points in the form of an array
+    assignPointsToCentroids = ( points ) => {
+        let datasets = this.props.datasets;
+        let assignedPoints = []; // each element will contain points that correspond to the (n*2 + 1) centroid
+        
+        // If there's no data, we return
+        if ( datasets.length == 0) {
+            alert('We have no data to work with!');
 
+            return [];
+        }
+
+        let centroidPoints = [];
+        let counter = 0; // counter for assigned points (since the for loop uses centroid indexes)
+
+        // We first get all centroid positions
+        for ( let i=1; i<datasets.length; i=i+2 )  {
+            centroidPoints.push( datasets[ i ].data[ 0 ] );
+
+            // We also use this loop to initialize the return array, creating an empty array at each index
+            assignedPoints[ counter ] = []; 
+            counter++;
+        }
+
+        // Then, for each point, we find its distance to all existing centroids
         points.forEach( point => {
-            // If the point is closer to centroid A, we place it in group A
-            if ( this.getDistanceBetweenPoints( point, centroidA ) <= this.getDistanceBetweenPoints( point, centroidB ) ) {
-                groupA.push(point);
-            } else {
-                // Otherwise, we place it in group B
-                groupB.push(point);
+            let centroidDistances = [];
+
+            // We calculate the distance to each centroid for this point
+            for ( let j=0; j<centroidPoints.length; j++ ) {
+                centroidDistances[ j ] = this.getDistanceBetweenPoints( point, centroidPoints[ j ] );
             }
+
+            // We find the index of the closest centroid by using the index of the minimum distance
+            let closestCentroidIndex = centroidDistances.indexOf(Math.min( ...centroidDistances ))
+
+            // Finally, we place the point in the correct array element (corresponding to a centroid)
+            assignedPoints[ closestCentroidIndex ].push( point );
         });
 
-        return [groupA, groupB];
+        return assignedPoints;
     }
 
     // Returns the Cartesian, 2D distance between 2 points
@@ -248,7 +351,7 @@ class MyChart extends Component {
 
 
     // This returns the average position of all points in a cluster
-    getAveragePositionOfPoints = (points) => {
+    getAveragePositionOfPoints = ( points ) => {
         if (points.length == 0) {
             return { x: 0, y: 0 };
         }
@@ -264,7 +367,7 @@ class MyChart extends Component {
         });
 
         // Then, we return a point that contains the average of all points in the team
-        return { x: ( xSum/points.length ).toFixed( 2 ), y: ( ySum/points.length ).toFixed( 2 ) };
+        return { x: ( xSum / points.length ).toFixed( 2 ), y: ( ySum / points.length ).toFixed( 2 ) };
     }
 
     render() {
@@ -276,12 +379,8 @@ class MyChart extends Component {
         let btnDefaultStyle = { opacity: spring(1 , { stiffness: Constants.ReactMotion.BTN_STIFFNESS, damping: Constants.ReactMotion.BTN_DAMPING })};
         let isDisabled = false;
 
-        console.log('chart ready');
-        console.log( this.props );
-
         // Creates properties for buttons depending on the application state we're in
         switch( this.props.applicationState ) {
-
             case Constants.ApplicationStates.BEGIN:
                 btn1Props = {
                     title: "Begin",
@@ -309,16 +408,16 @@ class MyChart extends Component {
                     clickFn: this.props.onAdvanceState
                 }
 
-                // TODO: add the below back when we have Redux
+                // If we have no unassigned points yet, we disable the continue button
+                let unassignedDatasetIndex = Constants.Global.INITIAL_TOTAL_CLUSTERS * 2;
 
-                /*
-                if (this.state.datasets[2].data.length == 0) {
+                if (this.props.datasets.length == 0 || 
+                    this.props.datasets[ unassignedDatasetIndex ] == undefined ||
+                    this.props.datasets[ unassignedDatasetIndex ].data.length == 0) {
                     isDisabled = true;
                 }
-                */
-
+                
                 this.updateChart();
-
                 break;
 
             case Constants.ApplicationStates.STEPS:
@@ -335,7 +434,7 @@ class MyChart extends Component {
                 }
 
                 this.updateChart();
-            break;
+                break;
             }
 
             // TODO: possibly use this as an application state instead
@@ -383,7 +482,7 @@ const mapStateToProps = state => {
     return {
         applicationState: state.globalProps.applicationState,
         totalClusters: state.globalProps.totalClusters,
-        datasets: state.chartData.datasets
+        datasets: state.data.datasets
     }
 }
 

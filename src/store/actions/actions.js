@@ -10,10 +10,10 @@ export function advanceState() {
     };
 }
 
-export function initializeChartData( datasets ) {
+export function initializeChartData( chartData ) {
     return {
          type: INITIALIZE_CHART_DATA, 
-         datasets: datasets
+         chartData: chartData
     };
 }
 
