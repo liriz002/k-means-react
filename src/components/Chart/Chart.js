@@ -4,71 +4,26 @@ import Chart from 'chart.js';
 import * as Constants from '../../constants/index';
 import Button from '../UI/Button/Button';
 import { Motion, spring } from 'react-motion';
-
+import { connect } from 'react-redux';
+import * as actions from '../../store/actions/actions';
+import { createStore } from 'redux';
 
 
 class MyChart extends Component {
     chartRef = React.createRef();
     myChart;
-    
-    // TODO: move to Redux
+  
     constructor(props) {
         super(props);
 
         Chart.defaults.global.defaultFontFamily = Constants.Global.FONT;
         this.state = {
-            applicationState: Constants.ApplicationStates.BEGIN,
             doneClustering: false,
-            currentStep: 0,
-            datasets: [
-                {
-                  label: 'Group A',
-                  borderColor: Constants.Colors.GROUP_A_BORDER,
-                  backgroundColor: Constants.Colors.GROUP_A_BACKGROUND,
-                  pointRadius: Constants.Chart.POINT_RADIUS,
-                  pointStyle: 'circle',
-                  data: []
-                },
-                {
-                    label: 'Group B',
-                    borderColor: Constants.Colors.GROUP_B_BORDER,
-                    backgroundColor: Constants.Colors.GROUP_B_BACKGROUND,
-                    pointRadius: Constants.Chart.POINT_RADIUS,
-                    pointStyle: 'circle',
-                    data: []
-                },
-                {
-                    label: 'Unassigned',
-                    borderColor: Constants.Colors.UNASSIGNED_BORDER,
-                    backgroundColor: Constants.Colors.UNASSIGNED_BACKGROUND,
-                    pointRadius: Constants.Chart.POINT_RADIUS,
-                    data: []
-                },
-                {
-                    label: 'Centroid A',
-                    borderColor: Constants.Colors.CENTROID_A_BORDER,
-                    backgroundColor: Constants.Colors.CENTROID_A_BACKGROUND,
-                    pointRadius: Constants.Chart.CENTROID_RADIUS,
-                    pointStyle: 'crossRot',
-                    borderWidth: 5,
-                    data: []
-                }, 
-                {
-                    label: 'Centroid B',
-                    borderColor: Constants.Colors.CENTROID_B_BORDER,
-                    backgroundColor: Constants.Colors.GROUP_B_BACKGROUND,
-                    pointRadius: Constants.Chart.CENTROID_RADIUS,
-                    pointStyle: 'crossRot',
-                    borderWidth: 5,
-                    data: []
-                },
-              ]
+            currentStep: 0
         };
     }
 
     componentDidMount() {
-        // console.log(this.chartReference); // returns a Chart.js instance reference
-
         const myChartRef = this.chartRef.current.getContext("2d");
 
         this.myChart = new Chart(myChartRef, {
@@ -80,75 +35,65 @@ class MyChart extends Component {
                     scales: {
                       xAxes: [{
                           ticks: {
-                              max: Constants.Chart.AXIS_MAX - 10,
-                              min: Constants.Chart.AXIS_MIN,
-                              stepSize: Constants.Chart.AXIS_STEP
+                              max: Constants.ChartProps.AXIS_MAX - 10,
+                              min: Constants.ChartProps.AXIS_MIN,
+                              stepSize: Constants.ChartProps.AXIS_STEP
                           }
                       }
       
                       ],
                       yAxes: [{
                           ticks: {
-                              max: Constants.Chart.AXIS_MAX,
-                              min: Constants.Chart.AXIS_MIN,
-                              stepSize: Constants.Chart.AXIS_STEP
+                              max: Constants.ChartProps.AXIS_MAX,
+                              min: Constants.ChartProps.AXIS_MIN,
+                              stepSize: Constants.ChartProps.AXIS_STEP
                           }
                       }]
                   },
                   
                   animation: {
-                      duration: Constants.Chart.ANIMATION_DURATION,
-                      easing: Constants.Chart.ANIMATION_TYPE
+                      duration: Constants.ChartProps.ANIMATION_DURATION,
+                      easing: Constants.ChartProps.ANIMATION_TYPE
                   }
               }
             //} 
         });
       }
 
-      printState = () => {
-        console.log(this.state);
-      }
-
+    // Initializes the data in the cart
     initializeData = () => {
-        let prevState = { ...this.state };
+        const datasets = [];
 
-        // Then, we set the initial state of the data
-        // 1) Generate random points for group A
-        // 2) Place 2 centroids (A and B) randomly
+        // We start off by generating the points for the chart for the unassigned category
+        const points = this.generateRandomPoints(Constants.Global.NUM_OF_DATA_POINTS, true);
 
-        // We start by generating random points for the unassigned group
-        prevState.datasets[2].data = this.generateRandomPoints(Constants.Global.NUM_OF_DATA_POINTS, true);
+        // For each cluster we have, we:
+        // 1) Push a dataset for the points associated with the cluster
+        // 2) Push a dataset for the cluster itself, setting a random position for it
 
-        // Then, we assign centroids A and B random positions
-        // To do that, we will get 2 distinct random points from the created points. We then find
-        // 2 numbers in [0, # of points - 1]
-        // We use this logic: https://stackoverflow.com/a/7228322/3659145
-        let randomA = -1;
-        let randomB = -1;
+        for ( let i=0; i<this.props.totalClusters; i++ ) {
+            // We get the corresponding group dataset and initialize the data as an empty array
+            const groupDataset = { ...Constants.Styles.Group[ i ] };
+            groupDataset.data = [];
 
-        // We do a while loop to ensure that randomA and randomB are different
-        while (randomB == -1) {
-            // First, we assign a random number to random A if needed
-            if (randomA == -1) {
-                randomA = Math.floor( ( Math.random() * ( prevState.datasets[2].data.length - 1 ) ));
-            }
+            // And then the corresponding centroid dataset
+            const centroidDataset = { ...Constants.Styles.Centroid[ i ]  };
 
-            // We generate a second random number for B
-            let tempB = Math.floor( ( Math.random() * ( prevState.datasets[2].data.length - 1 ) ) );
+            // We give the centroid a starting position based on an existing points
+            // TODO: maybe have this so that they're always different for each point
+            centroidDataset.data = [ points[ Math.floor( Math.random() * ( points.length - 1 ) ) ] ];
 
-            // If it's different than randomA, we assign it to randomA then
-            if (randomA != tempB) {
-                randomB = tempB;
-            }
+            // Finally, we push both the group and centroid datasets
+            datasets.push( groupDataset, centroidDataset );
         }
 
-        // We assign the centroids to the correct positions
-        prevState.datasets[3].data = [ prevState.datasets[2].data[randomA] ]; // this.generateRandomPoints(1, false);
-        prevState.datasets[4].data = [ prevState.datasets[2].data[randomB] ]; // this.generateRandomPoints(1, false);
+        // Finally, we push push an unassigned dataset which will contain all the points initially
+        const unassignedDataset = { ...Constants.Styles.Unassigned[0] };
+        unassignedDataset.data = points;
+        datasets.push( unassignedDataset );
 
-        // Finally, we update the state and the cart as well
-        this.setState({ ...prevState });
-       this.updateChart();
+        // We store this initial data
+        this.props.onInitializeChartData( datasets );
     }
 
     performStep = () => {
@@ -226,7 +171,6 @@ class MyChart extends Component {
             this.updateChart();
         }, 0);
 
-        console.log(this.state);
     }
 
     // Traverses through a list of points, assigning points to the group of the centroid to which
@@ -272,8 +216,9 @@ class MyChart extends Component {
         return points;
     }
 
+    // Updates the chart based on the given datasets
     updateChart = () => {
-        this.myChart.data.datasets = this.state.datasets;
+        this.myChart.data.datasets = this.props.datasets;
         this.myChart.update();
     }
 
@@ -322,13 +267,6 @@ class MyChart extends Component {
         return { x: ( xSum/points.length ).toFixed( 2 ), y: ( ySum/points.length ).toFixed( 2 ) };
     }
 
-    // Moves to the next state
-    advanceState = () => {
-        let prevState = { ...this.state };
-        prevState.applicationState += 1;
-        this.setState({ ...prevState });
-    }
-
     render() {
         let btn1Props = {};
         let btn2Props = {};
@@ -338,13 +276,17 @@ class MyChart extends Component {
         let btnDefaultStyle = { opacity: spring(1 , { stiffness: Constants.ReactMotion.BTN_STIFFNESS, damping: Constants.ReactMotion.BTN_DAMPING })};
         let isDisabled = false;
 
+        console.log('chart ready');
+        console.log( this.props );
+
         // Creates properties for buttons depending on the application state we're in
-        switch( this.state.applicationState ) {
+        switch( this.props.applicationState ) {
+
             case Constants.ApplicationStates.BEGIN:
                 btn1Props = {
                     title: "Begin",
                     classes: button1Classes,
-                    clickFn: this.advanceState
+                    clickFn: this.props.onAdvanceState
                 }
 
                 btn2Props = {
@@ -364,12 +306,18 @@ class MyChart extends Component {
                 btn2Props = {
                     title: "Continue",
                     classes: button2Classes,
-                    clickFn: this.advanceState
+                    clickFn: this.props.onAdvanceState
                 }
 
+                // TODO: add the below back when we have Redux
+
+                /*
                 if (this.state.datasets[2].data.length == 0) {
                     isDisabled = true;
                 }
+                */
+
+                this.updateChart();
 
                 break;
 
@@ -385,6 +333,8 @@ class MyChart extends Component {
                     classes: button2Classes,
                     clickFn: this.performAutomatically
                 }
+
+                this.updateChart();
             break;
             }
 
@@ -402,7 +352,7 @@ class MyChart extends Component {
                     />
                 </div> 
 
-                <Motion key={ this.state.applicationState + '_' + '1' } defaultStyle={ btnStyle } style={ btnDefaultStyle }>
+                <Motion key={ this.props.applicationState + '_' + '1' } defaultStyle={ btnStyle } style={ btnDefaultStyle }>
                 { style => (
                     <Button 
                         style={{ opacity: style.opacity }}
@@ -413,7 +363,7 @@ class MyChart extends Component {
                 )}
                 </Motion>
 
-                <Motion key={ this.state.applicationState + '_' + '2' } defaultStyle={ btnStyle } style={ btnDefaultStyle }>
+                <Motion key={ this.props.applicationState + '_' + '2' } defaultStyle={ btnStyle } style={ btnDefaultStyle }>
                 { style => (
                     <Button 
                         style={{ opacity: style.opacity }}
@@ -428,6 +378,23 @@ class MyChart extends Component {
         );
     }
 }
+
+const mapStateToProps = state => {
+    return {
+        applicationState: state.globalProps.applicationState,
+        totalClusters: state.globalProps.totalClusters,
+        datasets: state.chartData.datasets
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onAdvanceState: () => dispatch(actions.advanceState()),
+        onInitializeChartData: ( datasets ) => dispatch(actions.initializeChartData( datasets ))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(MyChart);
 
 /*
 <Scatter ref={ref => this.chartReference = ref} data={this.state} options={options} />
@@ -452,5 +419,3 @@ Repeat until convergence:
 
 
 */
-
-export default MyChart;
