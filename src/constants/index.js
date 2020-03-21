@@ -1,6 +1,6 @@
 export const Global = {
     FONT: 'Quicksand',
-    NUM_OF_DATA_POINTS: 100,
+    NUM_OF_DATA_POINTS: 200,
     LINEAR_DATA_X_MULTIPLIER: 10,
     LINEAR_DATA_Y_MULTIPLIER: 20,
     AUTOMATIC_STEPS_INTERVAL: 1000,
@@ -9,11 +9,12 @@ export const Global = {
 
 export const ChartProps = {
     POINT_RADIUS : 10,
+    POINT_BORDER_WIDTH: 1,
     CENTROID_RADIUS : 25,
     CENTROID_BORDER_WIDTH: 5,
     GROUP_1_POINT_STYLE: 'circle',
-    GROUP_2_POINT_STYLE: 'crossRot',
-    GROUP_3_POINT_STYLE: 'triangle',
+    GROUP_2_POINT_STYLE: 'triangle',
+    GROUP_3_POINT_STYLE: 'rect',
     ANIMATION_DURATION: 1000,
     ANIMATION_TYPE: 'easeInOutQuart',
     AXIS_MIN: 0,
@@ -28,6 +29,7 @@ export const Styles = {
             borderColor: 'rgb(54, 162, 235)',
             backgroundColor: 'rgba(54, 162, 235, 0.2)',
             pointRadius: ChartProps.POINT_RADIUS,
+            borderWidth: ChartProps.POINT_BORDER_WIDTH,
             pointStyle: ChartProps.GROUP_1_POINT_STYLE
         },
         {
@@ -35,6 +37,7 @@ export const Styles = {
             borderColor: 'rgb(255, 99, 132)',
             backgroundColor: 'rgba(255, 99, 132, 0.2)',
             pointRadius: ChartProps.POINT_RADIUS,
+            borderWidth: ChartProps.POINT_BORDER_WIDTH,
             pointStyle: ChartProps.GROUP_2_POINT_STYLE
         },
         {
@@ -42,6 +45,7 @@ export const Styles = {
             borderColor: 'rgb(86, 52, 255)',
             backgroundColor: 'rgba(86, 52, 255, 0.2)',
             pointRadius: ChartProps.POINT_RADIUS,
+            borderWidth: ChartProps.POINT_BORDER_WIDTH,
             pointStyle: ChartProps.GROUP_3_POINT_STYLE
         }
     ],

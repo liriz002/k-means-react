@@ -31,7 +31,7 @@ class MyChart extends Component {
             //data: {
                 datasets: [],
                 options: {
-                    
+                    /*
                     scales: {
                       xAxes: [{
                           ticks: {
@@ -50,6 +50,7 @@ class MyChart extends Component {
                           }
                       }]
                   },
+                  */
                   
                   animation: {
                       duration: Constants.ChartProps.ANIMATION_DURATION,
@@ -93,7 +94,7 @@ class MyChart extends Component {
             unassignedDataset.data = points;
             datasets.push( unassignedDataset );
         } else {
-            // We are shuffling data instead, so we update the datasets accordingly:
+            // We are shuffling existing data instead, so we update the datasets accordingly:
             // First, for each centroid, we get a new random point
             // (centroids are always at uneven positions, so we start a 1 and advance by 2)
             for ( let j=1; j<datasets.length; j=j+2 )  {
@@ -127,26 +128,28 @@ class MyChart extends Component {
         // We start with 1) by calculating the distance of each point to all centroids
         // to assign the point to its closest centroid
         let points = [];
+        let pointsAreAssigned = datasets[0].data.length != 0;
 
         // We first check if this is the first assignment
-        if ( datasets[0].data.length == 0 ) {
+        if ( !pointsAreAssigned ) {
             // If so, we'll get all points from the unassigned dataset
             points = [ ...datasets[ Constants.Global.INITIAL_TOTAL_CLUSTERS * 2 ].data ];
 
             // We clear the unassigned points, as they are in the process of being assigned
             datasets[ Constants.Global.INITIAL_TOTAL_CLUSTERS * 2 ].data = [];
         } else {
-            // Otherwise, it's not the first assignment, so we get points by merging points
-            // from all groups together
-            for ( let j=0; j<datasets.length; j=j+2 ) {
-                points = [...points, ...datasets[ j ].data ];
+            // Otherwise, it's not the first assignment, so we get points by pushing the data from each group
+            // into the points array
+            for ( let j=0; j<datasets.length-1; j=j+2 ) {
+                points.push( [ ...datasets[ j ].data ] );
             }
         }
 
         // In any case, we get all the points with their corresponding centroid assignments
         // and store them in the appropriate group. Also, we reposition the centroids
-        let orderedPoints = this.assignPointsToCentroids( points );
-
+        let orderedPoints = this.assignPointsToCentroids( points, pointsAreAssigned );
+              
+        // Then, we assign the ordered points to the correct groups
         for ( let i=0; i<orderedPoints.length; i++ ) {
             // We assign the points to the correct group
             datasets[ i * 2 ].data = orderedPoints [ i ];
@@ -155,34 +158,8 @@ class MyChart extends Component {
             datasets[ ( i * 2 ) + 1 ].data = [ this.getAveragePositionOfPoints( orderedPoints[ i ] ) ]; 
         }
 
-        // Then, we move on to step 2, in which we reposition the centroids
-        setTimeout(() => {
-            // For each centroid, we get the average position and assign it to its data
-            /*
-            for ( let k=1; k<datasets.length; k=k+2 ) {
-                k[  ] = [ this.getAveragePositionOfPoints ]
-            }
-            */
-
-            /*
-            // 2) Reposition centroids based on the new average of all of its points
-            newState.datasets[3].data = [this.getAveragePositionOfPoints(newState.datasets[0].data)];
-            newState.datasets[4].data = [this.getAveragePositionOfPoints(newState.datasets[1].data)];
-
-            newState.currentStep += 1;
-
-            this.setState( { ...newState } );
-            this.updateChart();
-            */
-        }, 0);
-
-
-
-
-
-
-
         this.props.onInitializeChartData( datasets );
+        
 
         /*
         // Declare some variables
@@ -253,9 +230,9 @@ class MyChart extends Component {
 
     // Traverses through a list of points, assigning points to the group of the centroid to which
     // they are closest to, returning the points in the form of an array
-    assignPointsToCentroids = ( points ) => {
+    assignPointsToCentroids = ( points, pointsAssignedAlready ) => {
         let datasets = this.props.datasets;
-        let assignedPoints = []; // each element will contain points that correspond to the (n*2 + 1) centroid
+        let assignedPoints = []; // each element will contain points that correspond to the (n*2 + 1) centroid (if unassigned)
         
         // If there's no data, we return
         if ( datasets.length == 0) {
@@ -271,28 +248,66 @@ class MyChart extends Component {
         for ( let i=1; i<datasets.length; i=i+2 )  {
             centroidPoints.push( datasets[ i ].data[ 0 ] );
 
-            // We also use this loop to initialize the return array, creating an empty array at each index
-            assignedPoints[ counter ] = []; 
-            counter++;
+            // If points are unassigned, we also use this loop to initialize the return array,
+            // creating an empty array at each index
+            if (!pointsAssignedAlready) {
+                assignedPoints[ counter ] = []; 
+                counter++;
+            }
         }
 
-        // Then, for each point, we find its distance to all existing centroids
-        points.forEach( point => {
-            let centroidDistances = [];
+        // If points are unassigned, they'll all be elements of an array, so we proceed to assign distances
+        if ( !pointsAssignedAlready ) {
+            console.log('points NOT assigned');
+            // Then, for each point, we find its distance to all existing centroids
+            points.forEach( point => {
+                let centroidDistances = [];
 
-            // We calculate the distance to each centroid for this point
-            for ( let j=0; j<centroidPoints.length; j++ ) {
-                centroidDistances[ j ] = this.getDistanceBetweenPoints( point, centroidPoints[ j ] );
+                // We calculate the distance to each centroid for this point
+                for ( let j=0; j<centroidPoints.length; j++ ) {
+                    centroidDistances[ j ] = this.getDistanceBetweenPoints( point, centroidPoints[ j ] );
+                }
+
+                // We find the index of the closest centroid by using the index of the minimum distance
+                let closestCentroidIndex = centroidDistances.indexOf(Math.min( ...centroidDistances ))
+
+                // Finally, we place the point in the correct array element (corresponding to a centroid)
+                assignedPoints[ closestCentroidIndex ].push( point );
+            });
+
+            return assignedPoints;
+        } else {
+            // Otherwise, the points came assigned already. To maintain a smooth chart, we will 
+            // need to push/remove elements dynamically from different arrays if they changed groups
+
+            // For each array level...
+            for ( let i=0; i<points.length; i++ ) {
+                let pointsArr = points[ i ];
+
+                // Then, for each array with points corresponding to the (n*2)th level, we start from the back
+                // of the array to be able to splice
+                for ( let k=pointsArr.length-1; k>=0; k-- ) {
+                    const point = pointsArr[ k ];
+
+                    // For each point, we calculate the distances to all centroids and return those distances in an array
+                    let centroidDistances = centroidPoints.map(( cPoint ) => {
+                        return this.getDistanceBetweenPoints( point, cPoint );
+                    });
+
+                    // Get the index of the closest centroid
+                    let closestCentroidIndex = centroidDistances.indexOf(Math.min( ...centroidDistances ) );
+                    
+                    // If the outer loop's counter value is different than the closest centroid index, the point needs to be moved to a different array level
+                    if ( i != closestCentroidIndex ) {
+                        // We splice the point off of the current points array level and push it into the correct array level
+                        console.log('moving');
+                        points[ closestCentroidIndex ].push( pointsArr.splice( k, 1 )[ 0 ] );
+                    }
+                }
             }
 
-            // We find the index of the closest centroid by using the index of the minimum distance
-            let closestCentroidIndex = centroidDistances.indexOf(Math.min( ...centroidDistances ))
-
-            // Finally, we place the point in the correct array element (corresponding to a centroid)
-            assignedPoints[ closestCentroidIndex ].push( point );
-        });
-
-        return assignedPoints;
+            return [ ...points ];
+        }
     }
 
     // Returns the Cartesian, 2D distance between 2 points

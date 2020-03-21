@@ -5,7 +5,6 @@ import MyChart from './components/Chart/Chart';
 function App() {
   return (
     <div className="App">
-      <h1>K-means Clustering</h1>
       <MyChart />
     </div>
   );
