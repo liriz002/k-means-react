@@ -1,6 +1,7 @@
 // Action Types
 export const ADVANCE_APPLICATION_STATE = 'ADVANCE_APPLICATION_STATE';
-export const INITIALIZE_CHART_DATA = 'INITIALIZE_CHART_DATA';
+export const RESET_APPLICATION_STATE = 'RESET_APPLICATION_STATE';
+export const UPDATE_CHART_DATA = 'UPDATE_CHART_DATA';
 export const UPDATE_CLUSTERS_NUMBER = 'UPDATE_CLUSTERS_NUMBER';
 export const SET_AUTOMATIC = 'SET_AUTOMATIC';
 
@@ -11,9 +12,15 @@ export function advanceState() {
     };
 }
 
-export function initializeChartData( chartData ) {
+export function resetApplicationState() {
     return {
-         type: INITIALIZE_CHART_DATA, 
+        type: RESET_APPLICATION_STATE
+    };
+}
+
+export function updateChartData( chartData ) {
+    return {
+         type: UPDATE_CHART_DATA, 
          chartData: chartData
     };
 }

@@ -6,7 +6,6 @@ import Button from '../UI/Button/Button';
 import { Motion, spring } from 'react-motion';
 import { connect } from 'react-redux';
 import * as actions from '../../store/actions/actions';
-import { createStore } from 'redux';
 
 
 class MyChart extends Component {
@@ -25,34 +24,34 @@ class MyChart extends Component {
         this.myChart = new Chart(myChartRef, {
             type: "scatter",
             //data: {
-                datasets: [],
-                options: {
-                    /*
-                    scales: {
-                      xAxes: [{
-                          ticks: {
-                              max: Constants.ChartProps.AXIS_MAX - 10,
-                              min: Constants.ChartProps.AXIS_MIN,
-                              stepSize: Constants.ChartProps.AXIS_STEP
-                          }
-                      }
-      
-                      ],
-                      yAxes: [{
-                          ticks: {
-                              max: Constants.ChartProps.AXIS_MAX,
-                              min: Constants.ChartProps.AXIS_MIN,
-                              stepSize: Constants.ChartProps.AXIS_STEP
-                          }
-                      }]
-                  },
-                  */
-                  
-                  animation: {
-                      duration: Constants.ChartProps.ANIMATION_DURATION,
-                      easing: Constants.ChartProps.ANIMATION_TYPE
-                  }
-              }
+            datasets: [],
+            options: {
+                /*
+                scales: {
+                    xAxes: [{
+                        ticks: {
+                            max: Constants.ChartProps.AXIS_MAX - 10,
+                            min: Constants.ChartProps.AXIS_MIN,
+                            stepSize: Constants.ChartProps.AXIS_STEP
+                        }
+                    }
+    
+                    ],
+                    yAxes: [{
+                        ticks: {
+                            max: Constants.ChartProps.AXIS_MAX,
+                            min: Constants.ChartProps.AXIS_MIN,
+                            stepSize: Constants.ChartProps.AXIS_STEP
+                        }
+                    }]
+                },
+                */
+                
+                animation: {
+                    duration: Constants.ChartProps.ANIMATION_DURATION,
+                    easing: Constants.ChartProps.ANIMATION_TYPE
+                }
+            }
             //} 
         });
       }
@@ -65,7 +64,7 @@ class MyChart extends Component {
         const points = this.generateRandomPoints(Constants.Global.NUM_OF_DATA_POINTS, true);
 
         // Then, we check whether we are initializing data or shuffling existing data
-        if ( datasets.length == 0 ) {
+        if ( datasets.length === 0 ) {
             // We are initializing data. For each cluster we have, we:
             // 1) Push a dataset for the points associated with the cluster
             // 2) Push a dataset for the cluster itself, setting a random position for it
@@ -104,12 +103,12 @@ class MyChart extends Component {
         }
 
         // We store this data with the reducer
-        this.props.onInitializeChartData( datasets );
+        this.props.onUpdateChartData( datasets );
     }
 
     // Performs a step of the algorithm
     performStep = () => {
-        if (this.props.datasets.length == 0) {
+        if (this.props.datasets.length === 0) {
             alert('There\'s no data to work with!');
 
             return;
@@ -124,7 +123,7 @@ class MyChart extends Component {
         // We start with 1) by calculating the distance of each point to all centroids
         // to assign the point to its closest centroid
         let points = [];
-        let pointsAreAssigned = datasets[0].data.length != 0;
+        let pointsAreAssigned = datasets[0].data.length !== 0;
 
         // We first check if this is the first assignment
         if ( !pointsAreAssigned ) {
@@ -147,11 +146,11 @@ class MyChart extends Component {
               
         // Then, we assign the ordered points to the correct groups
         for ( let i=0; i<orderedPoints.length; i++ ) {
-            datasets[ i * 2 ].data = orderedPoints [ i ];
+            datasets[ i * 2 ].data = orderedPoints[ i ];
         }
 
         // We update the state and animate the chart with no animation to prevent points from shifting places
-        this.props.onInitializeChartData( datasets );
+        this.props.onUpdateChartData( datasets );
         this.updateChart( 0 );
 
         // Then, we use a neat little trick using setTimeout to animate the centroids (as opposed to NOT animating points),
@@ -165,8 +164,6 @@ class MyChart extends Component {
 
                 // First, we calculate the new position of the centroid
                 let newCentroidPos = [ this.getAveragePositionOfPoints( orderedPoints[ i ] ) ];
-
-                console.log( currentCentroidPos[ 0 ], newCentroidPos[ 0 ] );
 
                 // Then, we check whether the centroid stays in the same position
                 if ( !this.pointsAreEqual( currentCentroidPos[ 0 ], newCentroidPos[ 0 ] ) ) {
@@ -184,14 +181,14 @@ class MyChart extends Component {
                 return;
             }
 
-            this.props.onInitializeChartData( datasets );
+            this.props.onUpdateChartData( datasets );
             this.updateChart( );
         }, 0);
     }
 
     // Determines if 2 points are equal
     pointsAreEqual = ( point1, point2 ) => {
-        return point1.x == point2.x && point1.y == point2.y;  
+        return point1.x === point2.x && point1.y === point2.y;  
     };
     
 
@@ -202,9 +199,8 @@ class MyChart extends Component {
         let assignedPoints = []; // each element will contain points that correspond to the (n*2 + 1) centroid (if unassigned)
         
         // If there's no data, we return
-        if ( datasets.length == 0) {
+        if ( datasets.length === 0) {
             alert('We have no data to work with!');
-
             return [];
         }
 
@@ -262,9 +258,8 @@ class MyChart extends Component {
                     let closestCentroidIndex = centroidDistances.indexOf(Math.min( ...centroidDistances ) );
                     
                     // If the outer loop's counter value is different than the closest centroid index, the point needs to be moved to a different array level
-                    if ( i != closestCentroidIndex ) {
+                    if ( i !== closestCentroidIndex ) {
                         // We splice the point off of the current points array level and push it into the correct array level
-                        console.log('moving');
                         points[ closestCentroidIndex ].push( pointsArr.splice( k, 1 )[ 0 ] );
                     }
                 }
@@ -306,11 +301,8 @@ class MyChart extends Component {
 
     // Continues each step until clustering is finished
     performAutomatically = () => {
-        console.log(this.props.isAutomatic);
         // We mark that we are going automatic
         this.props.onSetAutomatic( true );
-
-        console.log(this.props.isAutomatic);
 
         // We perform a step immediately
         this.performStep();
@@ -332,7 +324,7 @@ class MyChart extends Component {
 
     // This returns the average position of all points in a cluster
     getAveragePositionOfPoints = ( points ) => {
-        if (points.length == 0) {
+        if (points.length === 0) {
             return { x: 0, y: 0 };
         }
 
@@ -348,6 +340,13 @@ class MyChart extends Component {
 
         // Then, we return a point that contains the average of all points in the team
         return { x: ( xSum / points.length ).toFixed( 2 ), y: ( ySum / points.length ).toFixed( 2 ) };
+    }
+
+    // Resets the chart data and puts the app in the "Randomize" application state
+    reset = () => {
+        this.props.onSetAutomatic( false ); // we do this in case the user previously had used automatic
+        this.props.onUpdateChartData( [] );
+        this.props.onResetApplicationState();
     }
 
     render() {
@@ -377,7 +376,7 @@ class MyChart extends Component {
 
             case Constants.ApplicationStates.RANDOMIZE:
                 btn1Props = {
-                    title: "Shuffle Data",
+                    title: ( this.props.datasets.length === 0 ) ? "Shuffle Data" : "Shuffle Again",
                     classes: button1Classes,
                     clickFn: this.initializeData
                 }
@@ -391,9 +390,9 @@ class MyChart extends Component {
                 // If we have no unassigned points yet, we disable the continue button
                 let unassignedDatasetIndex = Constants.Global.INITIAL_TOTAL_CLUSTERS * 2;
 
-                if (this.props.datasets.length == 0 || 
-                    this.props.datasets[ unassignedDatasetIndex ] == undefined ||
-                    this.props.datasets[ unassignedDatasetIndex ].data.length == 0) {
+                if (this.props.datasets.length === 0 || 
+                    this.props.datasets[ unassignedDatasetIndex ] === undefined ||
+                    this.props.datasets[ unassignedDatasetIndex ].data.length === 0) {
                     isDisabled = true;
                 }
                 
@@ -416,10 +415,32 @@ class MyChart extends Component {
                 break;
 
             case Constants.ApplicationStates.FINISHED:
+                btn1Props = {
+                    title: "Reset",
+                    classes: "Button Button3",
+                    clickFn: this.reset
+                }
 
-                console.log( 'finished for real');
+                btn2Props = {
+                    title: "",
+                    classes: "hide",
+                    clickFn: (() =>{})
+                }
 
                 break;
+
+            default:
+                btn1Props = {
+                    title: "",
+                    classes: "hide",
+                    clickFn: (() => {})
+                }
+
+                btn2Props = {
+                    title: "",
+                    classes: "hide",
+                    clickFn: (() => {})
+                }
             }
 
         return (
@@ -431,26 +452,26 @@ class MyChart extends Component {
                     />
                 </div> 
 
-                <Motion key={ this.props.applicationState + '_' + '1' } defaultStyle={ btnStyle } style={ btnDefaultStyle }>
+                <Motion key={ this.props.applicationState + '_1' } defaultStyle={ btnStyle } style={ btnDefaultStyle }>
                 { style => (
                     <Button 
                         style={{ opacity: style.opacity }}
                         title={ btn1Props.title }
                         className={ btn1Props.classes }
                         clicked={ btn1Props.clickFn }
-                        disabled = { this.props.isAutomatic && this.props.applicationState == Constants.ApplicationStates.STEPS }
+                        disabled = { this.props.isAutomatic && this.props.applicationState === Constants.ApplicationStates.STEPS }
                     />
                 )}
                 </Motion>
 
-                <Motion key={ this.props.applicationState + '_' + '2' } defaultStyle={ btnStyle } style={ btnDefaultStyle }>
+                <Motion key={ this.props.applicationState + '_2' } defaultStyle={ btnStyle } style={ btnDefaultStyle }>
                 { style => (
                     <Button 
                         style={{ opacity: style.opacity }}
                         title={ btn2Props.title }
                         className={ btn2Props.classes }
                         clicked={ btn2Props.clickFn }
-                        disabled = { isDisabled || ( this.props.isAutomatic && this.props.applicationState == Constants.ApplicationStates.STEPS ) }
+                        disabled = { isDisabled || ( this.props.isAutomatic && this.props.applicationState === Constants.ApplicationStates.STEPS ) }
                     />
                 )}
                 </Motion>
@@ -471,8 +492,9 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
     return {
         onAdvanceState: () => dispatch(actions.advanceState()),
-        onInitializeChartData: ( datasets ) => dispatch(actions.initializeChartData( datasets )),
-        onSetAutomatic: ( isAutomatic ) => dispatch( actions.setAutomatic( isAutomatic ) )
+        onUpdateChartData: ( datasets ) => dispatch(actions.updateChartData( datasets )),
+        onSetAutomatic: ( isAutomatic ) => dispatch( actions.setAutomatic( isAutomatic ) ),
+        onResetApplicationState: () => dispatch( actions.resetApplicationState() )
     }
 }
 

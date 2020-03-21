@@ -13,6 +13,8 @@ const globalProps = ( state = initialState, action ) => {
     switch (action.type) {
         case Actions.ADVANCE_APPLICATION_STATE:
             return { ...state, applicationState: state.applicationState + 1 };
+        case Actions.RESET_APPLICATION_STATE:
+            return { ...state, applicationState: Constants.ApplicationStates.RANDOMIZE }
         case Actions.SET_AUTOMATIC:
             return { ...state, isAutomatic: action.isAutomatic };
         default:
@@ -27,7 +29,7 @@ const initialData = {
 
 const data = ( state = initialData, action ) => {
     switch (action.type) {
-        case Actions.INITIALIZE_CHART_DATA:
+        case Actions.UPDATE_CHART_DATA:
             return { ...state, datasets: [ ...action.chartData ] };
         default:
             return state;
