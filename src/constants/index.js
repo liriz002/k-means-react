@@ -1,8 +1,8 @@
 export const Global = {
     FONT: 'Quicksand',
-    NUM_OF_DATA_POINTS: 200,
+    NUM_OF_DATA_POINTS: 100,
     LINEAR_DATA_X_MULTIPLIER: 10,
-    LINEAR_DATA_Y_MULTIPLIER: 20,
+    LINEAR_DATA_Y_MULTIPLIER: 30,
     AUTOMATIC_STEPS_INTERVAL: 1000,
     INITIAL_TOTAL_CLUSTERS: 3
 }
@@ -90,7 +90,7 @@ export const ApplicationStates = {
     BEGIN: 0,
     RANDOMIZE: 1,
     STEPS: 2,
-    FINISH: 3
+    FINISHED: 3
 }
 
 export const ReactMotion = {

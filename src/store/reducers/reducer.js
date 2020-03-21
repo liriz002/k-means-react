@@ -5,13 +5,16 @@ import * as Constants from '../../constants/index';
 // Reducer #1: application state + settings
 const initialState = {
     applicationState: 0,
-    totalClusters: Constants.Global.INITIAL_TOTAL_CLUSTERS
+    totalClusters: Constants.Global.INITIAL_TOTAL_CLUSTERS,
+    isAutomatic: false
 }
 
 const globalProps = ( state = initialState, action ) => {
     switch (action.type) {
         case Actions.ADVANCE_APPLICATION_STATE:
             return { ...state, applicationState: state.applicationState + 1 };
+        case Actions.SET_AUTOMATIC:
+            return { ...state, isAutomatic: action.isAutomatic };
         default:
             return state;
     }

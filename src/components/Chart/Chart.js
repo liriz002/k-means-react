@@ -17,10 +17,6 @@ class MyChart extends Component {
         super(props);
 
         Chart.defaults.global.defaultFontFamily = Constants.Global.FONT;
-        this.state = {
-            doneClustering: false,
-            currentStep: 0
-        };
     }
 
     componentDidMount() {
@@ -151,81 +147,52 @@ class MyChart extends Component {
               
         // Then, we assign the ordered points to the correct groups
         for ( let i=0; i<orderedPoints.length; i++ ) {
-            // We assign the points to the correct group
             datasets[ i * 2 ].data = orderedPoints [ i ];
-
-            // Then we reposition the centroids
-            datasets[ ( i * 2 ) + 1 ].data = [ this.getAveragePositionOfPoints( orderedPoints[ i ] ) ]; 
         }
 
+        // We update the state and animate the chart with no animation to prevent points from shifting places
         this.props.onInitializeChartData( datasets );
-        
+        this.updateChart( 0 );
 
-        /*
-        // Declare some variables
-        let newState = { ...this.state };
-        let points;
-        let centroidA = newState.datasets[3].data[0];
-        let centroidB = newState.datasets[4].data[0];
-        let doneClustering = true; // is set to false if no points move from one group to the next
+        // Then, we use a neat little trick using setTimeout to animate the centroids (as opposed to NOT animating points),
+        // so that the algorithm can be fully appreciated by the user!
+        setTimeout(() => {
+            let doneClustering = true;
 
-       
-       
-        if (newState.currentStep == 0) {
-             points = newState.datasets[2].data;
+            // Then, we update the centroids' data and update the chart once again
+            for ( let i=0; i<orderedPoints.length; i++ ) {
+                let currentCentroidPos = datasets[ ( i * 2 ) + 1 ].data;
 
-             
-             newState.datasets[2].data = [];
+                // First, we calculate the new position of the centroid
+                let newCentroidPos = [ this.getAveragePositionOfPoints( orderedPoints[ i ] ) ];
 
-            // 1) We assign each point into its corresponding centroid
-            [newState.datasets[0].data, newState.datasets[1].data] = this.assignPointsToCentroids(points, centroidA, centroidB);
-        } else {
-            // Otherwise, we use points from A and B, so we merge all points
-            // For both groups A and B, we traverse their points. If a point is closer to the centroid of the other group,
-            // we remove it from one and add it on the other one
-            for ( let i=newState.datasets[0].data.length-1; i>=0; i-- ) {
-                let point = newState.datasets[0].data[i];
+                console.log( currentCentroidPos[ 0 ], newCentroidPos[ 0 ] );
 
-                if ( this.getDistanceBetweenPoints( point, centroidB ) < this.getDistanceBetweenPoints( point, centroidA ) ) {
-                    // The A point is closer to centroid B, so we remove it from group A and add it to group B
-                    newState.datasets[1].data.push(newState.datasets[0].data.splice(i, 1)[0]);
+                // Then, we check whether the centroid stays in the same position
+                if ( !this.pointsAreEqual( currentCentroidPos[ 0 ], newCentroidPos[ 0 ] ) ) {
+                    // If not, we are not done clustering
                     doneClustering = false;
                 }
+
+                // Finally, we move the centroid to the new position
+                datasets[ ( i * 2 ) + 1 ].data = newCentroidPos;
             }
 
-           for ( let i=newState.datasets[1].data.length-1; i>=0; i-- ) {
-                let point = newState.datasets[1].data[i];
+            // If we are done clustering, we go to the final step
+            if ( doneClustering ) {
+                this.props.onAdvanceState();
+                return;
+            }
 
-                if ( this.getDistanceBetweenPoints( point, centroidA ) < this.getDistanceBetweenPoints( point, centroidB ) ) {
-                    // The B point is closer to centroid A, so we remove it from group B and add it to group A
-                    newState.datasets[0].data.push(newState.datasets[1].data.splice(i, 1)[0]);
-                    doneClustering = false;
-                }
-           }
-        }
-
-        // If we are still in the first (zeroth) step, we are obviously not done clustering
-        if (newState.currentStep == 0) {
-            doneClustering = false;
-        }
-
-        newState.doneClustering = doneClustering;
-
-        this.setState( { ...newState } );
-        this.updateChart();
-
-        setTimeout(() => {
-            // 2) Reposition centroids based on the new average of all of its points
-            newState.datasets[3].data = [this.getAveragePositionOfPoints(newState.datasets[0].data)];
-            newState.datasets[4].data = [this.getAveragePositionOfPoints(newState.datasets[1].data)];
-
-            newState.currentStep += 1;
-
-            this.setState( { ...newState } );
-            this.updateChart();
+            this.props.onInitializeChartData( datasets );
+            this.updateChart( );
         }, 0);
-        */
     }
+
+    // Determines if 2 points are equal
+    pointsAreEqual = ( point1, point2 ) => {
+        return point1.x == point2.x && point1.y == point2.y;  
+    };
     
 
     // Traverses through a list of points, assigning points to the group of the centroid to which
@@ -258,15 +225,12 @@ class MyChart extends Component {
 
         // If points are unassigned, they'll all be elements of an array, so we proceed to assign distances
         if ( !pointsAssignedAlready ) {
-            console.log('points NOT assigned');
             // Then, for each point, we find its distance to all existing centroids
             points.forEach( point => {
-                let centroidDistances = [];
-
                 // We calculate the distance to each centroid for this point
-                for ( let j=0; j<centroidPoints.length; j++ ) {
-                    centroidDistances[ j ] = this.getDistanceBetweenPoints( point, centroidPoints[ j ] );
-                }
+                let centroidDistances = centroidPoints.map(( cPoint ) => {
+                    return this.getDistanceBetweenPoints( point, cPoint );
+                });
 
                 // We find the index of the closest centroid by using the index of the minimum distance
                 let closestCentroidIndex = centroidDistances.indexOf(Math.min( ...centroidDistances ))
@@ -335,17 +299,18 @@ class MyChart extends Component {
     }
 
     // Updates the chart based on the given datasets
-    updateChart = () => {
+    updateChart = ( duration = Constants.Global.ANIMATION_DURATION ) => {
         this.myChart.data.datasets = this.props.datasets;
-        this.myChart.update();
+        this.myChart.update( duration );
     }
 
     // Continues each step until clustering is finished
     performAutomatically = () => {
-        // TODO: here we advance to the next application state, but ensure this cannot be called
-        // if the user is FINISHED (buttons are blocked)
-        //this.advanceState();
+        console.log(this.props.isAutomatic);
+        // We mark that we are going automatic
+        this.props.onSetAutomatic( true );
 
+        console.log(this.props.isAutomatic);
 
         // We perform a step immediately
         this.performStep();
@@ -354,7 +319,7 @@ class MyChart extends Component {
         let stepInterval = window.setInterval(() => {
 
             // If there are no more steps, we stop the interval
-            if (this.state.doneClustering === true) {
+            if ( this.props.applicationState === Constants.ApplicationStates.FINISHED ) {
                 clearInterval(stepInterval);
 
                 return;
@@ -432,7 +397,7 @@ class MyChart extends Component {
                     isDisabled = true;
                 }
                 
-                this.updateChart();
+                this.updateChart( );
                 break;
 
             case Constants.ApplicationStates.STEPS:
@@ -448,14 +413,14 @@ class MyChart extends Component {
                     clickFn: this.performAutomatically
                 }
 
-                this.updateChart();
+                break;
+
+            case Constants.ApplicationStates.FINISHED:
+
+                console.log( 'finished for real');
+
                 break;
             }
-
-            // TODO: possibly use this as an application state instead
-          if (this.state.doneClustering === true) {
-            console.log('done');
-          }
 
         return (
             <div>                
@@ -473,6 +438,7 @@ class MyChart extends Component {
                         title={ btn1Props.title }
                         className={ btn1Props.classes }
                         clicked={ btn1Props.clickFn }
+                        disabled = { this.props.isAutomatic && this.props.applicationState == Constants.ApplicationStates.STEPS }
                     />
                 )}
                 </Motion>
@@ -484,7 +450,7 @@ class MyChart extends Component {
                         title={ btn2Props.title }
                         className={ btn2Props.classes }
                         clicked={ btn2Props.clickFn }
-                        disabled = { isDisabled }
+                        disabled = { isDisabled || ( this.props.isAutomatic && this.props.applicationState == Constants.ApplicationStates.STEPS ) }
                     />
                 )}
                 </Motion>
@@ -497,6 +463,7 @@ const mapStateToProps = state => {
     return {
         applicationState: state.globalProps.applicationState,
         totalClusters: state.globalProps.totalClusters,
+        isAutomatic: state.globalProps.isAutomatic,
         datasets: state.data.datasets
     }
 }
@@ -504,7 +471,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
     return {
         onAdvanceState: () => dispatch(actions.advanceState()),
-        onInitializeChartData: ( datasets ) => dispatch(actions.initializeChartData( datasets ))
+        onInitializeChartData: ( datasets ) => dispatch(actions.initializeChartData( datasets )),
+        onSetAutomatic: ( isAutomatic ) => dispatch( actions.setAutomatic( isAutomatic ) )
     }
 }
 
