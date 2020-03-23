@@ -5,8 +5,10 @@ import * as Constants from '../../constants/index';
 // Reducer #1: application state + settings
 const initialState = {
     applicationState: 0,
-    totalClusters: Constants.Global.INITIAL_TOTAL_CLUSTERS,
-    isAutomatic: false
+    numOfClusters: Constants.Global.INITIAL_NUM_OF_CLUSTERS,
+    isAutomatic: false,
+    showSettingsModal: false,
+    pointsDistribution: "linear"
 }
 
 const globalProps = ( state = initialState, action ) => {
@@ -14,9 +16,14 @@ const globalProps = ( state = initialState, action ) => {
         case Actions.ADVANCE_APPLICATION_STATE:
             return { ...state, applicationState: state.applicationState + 1 };
         case Actions.RESET_APPLICATION_STATE:
-            return { ...state, applicationState: Constants.ApplicationStates.RANDOMIZE }
+            console.log(state);
+            return { ...state, applicationState: Constants.ApplicationStates.RANDOMIZE, isAutomatic: false }
         case Actions.SET_AUTOMATIC:
             return { ...state, isAutomatic: action.isAutomatic };
+        case Actions.SHOW_SETTINGS_MODAL:
+            return { ...state, showSettingsModal: action.show }
+        case Actions.UPDATE_GLOBAL_PROPS:
+            return { ...state, ...action.globalProps };
         default:
             return state;
     }

@@ -21,8 +21,8 @@
     outline: 0 !important;
 }
 
-.Button:hover {
-    transform: translateY(-2px);
+.Button:hover, .SettingsButton:hover {
+    transform: translateY(-3px);
 }
 
 .Button:disabled, .Button:disabled:hover {
@@ -70,4 +70,30 @@
 .Button3:hover {
     background-color: #DC3545;
     color: white;
+}
+
+.SettingsButton {
+    position: absolute;
+    right: 5px;
+    display: flex;
+    align-items: center;
+    width: 150px;
+    color: #8898AA;
+    text-transform: none;
+}
+
+.Button div {
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    align-items: center;
+}
+
+.SettingsButton span {
+    margin-left: 10px;
+}
+
+.Icon {
+    height: 22px;
+    width: auto;
 }

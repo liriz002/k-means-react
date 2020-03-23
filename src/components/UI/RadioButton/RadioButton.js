@@ -1,5 +1,6 @@
 import React from 'react';
 import './RadioButton.scss';
+// import scatterIcon from './images/scatter_icon.png';
 
 const RadioButton = ( props ) => {
     return (

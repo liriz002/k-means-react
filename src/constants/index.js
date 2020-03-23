@@ -4,7 +4,8 @@ export const Global = {
     LINEAR_DATA_X_MULTIPLIER: 10,
     LINEAR_DATA_Y_MULTIPLIER: 30,
     AUTOMATIC_STEPS_INTERVAL: 1000,
-    INITIAL_TOTAL_CLUSTERS: 3
+    INITIAL_NUM_OF_CLUSTERS: 3,
+    INITIAL_POINTS_DISTRIBUTION: "linear"
 }
 
 export const ChartProps = {
@@ -13,8 +14,8 @@ export const ChartProps = {
     CENTROID_RADIUS : 25,
     CENTROID_BORDER_WIDTH: 5,
     GROUP_1_POINT_STYLE: 'circle',
-    GROUP_2_POINT_STYLE: 'triangle',
-    GROUP_3_POINT_STYLE: 'rect',
+    GROUP_2_POINT_STYLE: 'circle',
+    GROUP_3_POINT_STYLE: 'circle',
     ANIMATION_DURATION: 1000,
     ANIMATION_TYPE: 'easeInOutQuart',
     AXIS_MIN: 0,
@@ -25,25 +26,25 @@ export const ChartProps = {
 export const Styles = {
     Group: [
         {
-            label: 'Group 1',
+            label: 'Cluster 1',
             borderColor: 'rgb(54, 162, 235)',
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            backgroundColor: 'rgba(54, 162, 235, 0.3)',
             pointRadius: ChartProps.POINT_RADIUS,
             borderWidth: ChartProps.POINT_BORDER_WIDTH,
             pointStyle: ChartProps.GROUP_1_POINT_STYLE
         },
         {
-            label: 'Group 2',
+            label: 'Cluster 2',
             borderColor: 'rgb(255, 99, 132)',
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            backgroundColor: 'rgba(255, 99, 132, 0.3)',
             pointRadius: ChartProps.POINT_RADIUS,
             borderWidth: ChartProps.POINT_BORDER_WIDTH,
             pointStyle: ChartProps.GROUP_2_POINT_STYLE
         },
         {
-            label: 'Group 3',
+            label: 'Cluster 3',
             borderColor: 'rgb(86, 52, 255)',
-            backgroundColor: 'rgba(86, 52, 255, 0.2)',
+            backgroundColor: 'rgba(86, 52, 255, 0.3)',
             pointRadius: ChartProps.POINT_RADIUS,
             borderWidth: ChartProps.POINT_BORDER_WIDTH,
             pointStyle: ChartProps.GROUP_3_POINT_STYLE

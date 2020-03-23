@@ -14,7 +14,6 @@ class MyChart extends Component {
   
     constructor(props) {
         super(props);
-
         Chart.defaults.global.defaultFontFamily = Constants.Global.FONT;
     }
 
@@ -68,7 +67,7 @@ class MyChart extends Component {
             // We are initializing data. For each cluster we have, we:
             // 1) Push a dataset for the points associated with the cluster
             // 2) Push a dataset for the cluster itself, setting a random position for it
-            for ( let i=0; i<this.props.totalClusters; i++ ) {
+            for ( let i=0; i<this.props.numOfClusters; i++ ) {
                 // 1) We get the corresponding group dataset and initialize the data as an empty array
                 const groupDataset = { ...Constants.Styles.Group[ i ] };
                 groupDataset.data = [];
@@ -86,6 +85,7 @@ class MyChart extends Component {
     
             // Finally, we push push an unassigned dataset which will contain all the points initially
             const unassignedDataset = { ...Constants.Styles.Unassigned[0] };
+            console.log(unassignedDataset);
             unassignedDataset.data = points;
             datasets.push( unassignedDataset );
         } else {
@@ -98,7 +98,7 @@ class MyChart extends Component {
 
             // Finally, we get new unassigned points
             // (the unassigned set is the last dataset, so it's at position [ num clusters * 2 ])
-            let unassignedDataset = datasets[ Constants.Global.INITIAL_TOTAL_CLUSTERS * 2 ];
+            let unassignedDataset = datasets[ this.props.numOfClusters * 2 ];
             unassignedDataset.data = points;
         }
 
@@ -128,10 +128,10 @@ class MyChart extends Component {
         // We first check if this is the first assignment
         if ( !pointsAreAssigned ) {
             // If so, we'll get all points from the unassigned dataset
-            points = [ ...datasets[ Constants.Global.INITIAL_TOTAL_CLUSTERS * 2 ].data ];
+            points = [ ...datasets[ this.props.numOfClusters * 2 ].data ];
 
             // We clear the unassigned points, as they are in the process of being assigned
-            datasets[ Constants.Global.INITIAL_TOTAL_CLUSTERS * 2 ].data = [];
+            datasets[ this.props.numOfClusters * 2 ].data = [];
         } else {
             // Otherwise, it's not the first assignment, so we get points by pushing the data from each group
             // into the points array
@@ -344,9 +344,12 @@ class MyChart extends Component {
 
     // Resets the chart data and puts the app in the "Randomize" application state
     reset = () => {
-        this.props.onSetAutomatic( false ); // we do this in case the user previously had used automatic
         this.props.onUpdateChartData( [] );
         this.props.onResetApplicationState();
+    }
+
+    showSettings = () => {
+        this.props.onShowSettingsModal( !this.props.showSettingsModal );
     }
 
     render() {
@@ -362,7 +365,7 @@ class MyChart extends Component {
         switch( this.props.applicationState ) {
             case Constants.ApplicationStates.BEGIN:
                 btn1Props = {
-                    title: "Begin",
+                    title: "Get started",
                     classes: button1Classes,
                     clickFn: this.props.onAdvanceState
                 }
@@ -388,7 +391,7 @@ class MyChart extends Component {
                 }
 
                 // If we have no unassigned points yet, we disable the continue button
-                let unassignedDatasetIndex = Constants.Global.INITIAL_TOTAL_CLUSTERS * 2;
+                let unassignedDatasetIndex = this.props.numOfClusters * 2;
 
                 if (this.props.datasets.length === 0 || 
                     this.props.datasets[ unassignedDatasetIndex ] === undefined ||
@@ -451,6 +454,12 @@ class MyChart extends Component {
                     ref={this.chartRef}
                     />
                 </div> 
+                <Button
+                    className="Button SettingsButton"
+                    title="Settings"
+                    clicked={ this.showSettings }
+                    iconURL="https://image.flaticon.com/icons/svg/1790/1790042.svg"
+                />
 
                 <Motion key={ this.props.applicationState + '_1' } defaultStyle={ btnStyle } style={ btnDefaultStyle }>
                 { style => (
@@ -483,9 +492,10 @@ class MyChart extends Component {
 const mapStateToProps = state => {
     return {
         applicationState: state.globalProps.applicationState,
-        totalClusters: state.globalProps.totalClusters,
+        numOfClusters: state.globalProps.numOfClusters,
         isAutomatic: state.globalProps.isAutomatic,
-        datasets: state.data.datasets
+        datasets: state.data.datasets,
+        showSettingsModal: state.globalProps.showSettingsModal
     }
 }
 
@@ -494,7 +504,8 @@ const mapDispatchToProps = dispatch => {
         onAdvanceState: () => dispatch(actions.advanceState()),
         onUpdateChartData: ( datasets ) => dispatch(actions.updateChartData( datasets )),
         onSetAutomatic: ( isAutomatic ) => dispatch( actions.setAutomatic( isAutomatic ) ),
-        onResetApplicationState: () => dispatch( actions.resetApplicationState() )
+        onResetApplicationState: () => dispatch( actions.resetApplicationState() ),
+        onShowSettingsModal: ( show ) => dispatch( actions.showSettingsModal( show ) )
     }
 }
 
