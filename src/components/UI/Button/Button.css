@@ -1,15 +1,15 @@
 /* This is not really modular, as it applies changes to the whole project */
 .Button {
-    font-size: 16px;
+    font-size: 14px;
     font-family: 'Quicksand';
     font-weight: bold;
     padding: 10px 15px;
-    border-radius: 20px;
+    border-radius: 15px;
     text-transform: uppercase;
     cursor: pointer;
-    transition-duration: 0.6s;
+    transition-duration: 0.5s;
     margin: 0 5px;
-    width: 170px;
+    width: 140px;
 }
 
 .Button:active {
@@ -94,6 +94,10 @@
 }
 
 .Icon {
-    height: 22px;
+    height: 19px;
     width: auto;
+}
+
+.Modal-Cancel-Btn {
+    margin-right: 16px;
 }

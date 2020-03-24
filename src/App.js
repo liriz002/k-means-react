@@ -50,11 +50,19 @@ class App extends Component {
 
   render() {
     // IMPROVEMENT: save these repeated values in an object and iterate using "map"
-    let modal = <Modal isOpen={ this.props.showSettingsModal }>
-      <h2>Chart Settings</h2>
-      <hr /><br /><br />
-      <h3>Graph Type</h3>
-      <div className="radio-btn-container" style={{ display: "flex" }}>
+    // let modal = 
+      return (
+        <div className="App">
+           
+          <MyChart />
+          <Modal closeTimeoutMS={500} isOpen={ this.props.showSettingsModal }>
+          <div className="Modal-Title-Container">
+            <h2>Chart Settings</h2>
+         </div>
+      <br />
+      <div className="Modal-Controls-Container">
+      <h3>Points Distribution</h3>
+      <div className="Radio-Btn-Container">
         <RadioButton
           changed={ this.updatePointsDistribution }
           id="linear"
@@ -73,7 +81,7 @@ class App extends Component {
       </div>
 
       <h3>Number of Clusters</h3>
-      <div className="radio-btn-container" style={{ display: "flex" }}>
+      <div className="Radio-Btn-Container">
         <RadioButton
           changed={ this.updateNumberOfClusters }
           id="2"
@@ -97,27 +105,32 @@ class App extends Component {
           label="4"
           value="4"
         />
+
+        <RadioButton
+          changed={ this.updateNumberOfClusters }
+          id="5"
+          isSelected={ this.state.numOfClusters == 5 }
+          label="5"
+          value="5"
+        />
+        </div>
+        <hr />
       </div>
-
-
-      <Button 
-        className="Button Button1"
-        title="Save & Restart"
-        clicked={ this.saveSettings }
+  
+        <div className="Modal-Btn-Container">
+        <Button 
+          className="Button Button3 Modal-Cancel-Btn"
+          title="Cancel"
+          clicked={ this.cancelSettings }
         />
 
-      <Button 
-        className="Button Button3"
-        title="Cancel"
-        clicked={ this.cancelSettings }
+        <Button 
+          className="Button Button1"
+          title="Apply"
+          clicked={ this.saveSettings }
         />
-        
-    </Modal>;
-
-      return (
-        <div className="App">
-          <MyChart />
-          { modal }
+        </div>
+          </Modal>
         </div>
       );
     }

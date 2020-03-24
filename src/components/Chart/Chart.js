@@ -6,7 +6,7 @@ import Button from '../UI/Button/Button';
 import { Motion, spring } from 'react-motion';
 import { connect } from 'react-redux';
 import * as actions from '../../store/actions/actions';
-
+import { BasicLottieComponent } from '../Lottie/LottieControl';
 
 class MyChart extends Component {
     chartRef = React.createRef();
@@ -15,6 +15,7 @@ class MyChart extends Component {
     constructor(props) {
         super(props);
         Chart.defaults.global.defaultFontFamily = Constants.Global.FONT;
+        Chart.defaults.global.legend.labels.usePointStyle = true;
     }
 
     componentDidMount() {
@@ -22,9 +23,18 @@ class MyChart extends Component {
 
         this.myChart = new Chart(myChartRef, {
             type: "scatter",
-            //data: {
             datasets: [],
             options: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        fontColor: '#333'
+                    }
+                },
+                responsive: true,
+                
+                
                 /*
                 scales: {
                     xAxes: [{
@@ -51,7 +61,6 @@ class MyChart extends Component {
                     easing: Constants.ChartProps.ANIMATION_TYPE
                 }
             }
-            //} 
         });
       }
 
@@ -60,7 +69,7 @@ class MyChart extends Component {
         const datasets = [ ...this.props.datasets ];
 
         // We start off by generating the points for the chart for the unassigned category
-        const points = this.generateRandomPoints(Constants.Global.NUM_OF_DATA_POINTS, true);
+        const points = this.generateRandomPoints(Constants.Global.NUM_OF_DATA_POINTS);
 
         // Then, we check whether we are initializing data or shuffling existing data
         if ( datasets.length === 0 ) {
@@ -85,7 +94,6 @@ class MyChart extends Component {
     
             // Finally, we push push an unassigned dataset which will contain all the points initially
             const unassignedDataset = { ...Constants.Styles.Unassigned[0] };
-            console.log(unassignedDataset);
             unassignedDataset.data = points;
             datasets.push( unassignedDataset );
         } else {
@@ -274,10 +282,10 @@ class MyChart extends Component {
         return Math.sqrt( Math.pow( ( pointB.x - pointA.x ), 2 ) + Math.pow( ( pointB.y - pointA.y ), 2 ) );
     }
     
-    generateRandomPoints = (num, ordered) => {
+    generateRandomPoints = ( num ) => {
         let points = [];
 
-        if (ordered) {
+        if ( this.props.pointsDistribution === "linear" ) {
             // We generate points in an orderly (somewhat linear) fashion (we allow x and y coordinates to be up to z points away in the positive direction for both)
             // logic here: https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript (i + 5 - i + 1) = (5+1) = (6)
             for ( let i=0; i<num; i++ ) {
@@ -286,7 +294,7 @@ class MyChart extends Component {
         } else {
             // We generate points randomly
             for ( let i=0; i<num; i++ ) {
-                points.push({ x: parseFloat( Math.abs( Math.random() ).toFixed( 2 ) * 100 ), y: parseFloat(Math.abs( Math.random() ).toFixed( 2 ) ) * 100 });
+                points.push({ x: parseFloat( Math.abs( Math.random() ).toFixed( 2 ) * Constants.Global.SCATTERED_DATA_X_MULTIPLIER ), y: parseFloat(Math.abs( Math.random() ).toFixed( 2 ) ) * Constants.Global.SCATTERED_DATA_Y_MULTIPLIER });
             }
         }
 
@@ -390,6 +398,12 @@ class MyChart extends Component {
                     clickFn: this.props.onAdvanceState
                 }
 
+                if ( this.props.shouldPerformStep ) {
+                    // We perform a step for the user and then disable this value
+                    this.initializeData();
+                    this.props.onSetShouldPerformStep( false );
+                }
+
                 // If we have no unassigned points yet, we disable the continue button
                 let unassignedDatasetIndex = this.props.numOfClusters * 2;
 
@@ -399,7 +413,7 @@ class MyChart extends Component {
                     isDisabled = true;
                 }
                 
-                this.updateChart( );
+                this.updateChart(  );
                 break;
 
             case Constants.ApplicationStates.STEPS:
@@ -447,7 +461,7 @@ class MyChart extends Component {
             }
 
         return (
-            <div>                
+            <div>            
                 <div className="Chart">
                  <canvas 
                     id="myChart"
@@ -459,6 +473,7 @@ class MyChart extends Component {
                     title="Settings"
                     clicked={ this.showSettings }
                     iconURL="https://image.flaticon.com/icons/svg/1790/1790042.svg"
+                    disabled={ this.props.isAutomatic && this.props.applicationState === Constants.ApplicationStates.STEPS }
                 />
 
                 <Motion key={ this.props.applicationState + '_1' } defaultStyle={ btnStyle } style={ btnDefaultStyle }>
@@ -490,12 +505,24 @@ class MyChart extends Component {
 }
 
 const mapStateToProps = state => {
+    /*
+
+                <div style={{ display: 'inline-block', position: 'relative', bottom: '40px', float: 'left' }}>
+                    <BasicLottieComponent />
+                </div>
+                <span style={{float: 'left', fontWeight: 'bold' }}>You did it! Try again?</span>
+
+
+    */
+
     return {
         applicationState: state.globalProps.applicationState,
         numOfClusters: state.globalProps.numOfClusters,
         isAutomatic: state.globalProps.isAutomatic,
         datasets: state.data.datasets,
-        showSettingsModal: state.globalProps.showSettingsModal
+        showSettingsModal: state.globalProps.showSettingsModal,
+        shouldPerformStep: state.globalProps.shouldPerformStep,
+        pointsDistribution: state.globalProps.pointsDistribution
     }
 }
 
@@ -505,7 +532,8 @@ const mapDispatchToProps = dispatch => {
         onUpdateChartData: ( datasets ) => dispatch(actions.updateChartData( datasets )),
         onSetAutomatic: ( isAutomatic ) => dispatch( actions.setAutomatic( isAutomatic ) ),
         onResetApplicationState: () => dispatch( actions.resetApplicationState() ),
-        onShowSettingsModal: ( show ) => dispatch( actions.showSettingsModal( show ) )
+        onShowSettingsModal: ( show ) => dispatch( actions.showSettingsModal( show ) ),
+        onSetShouldPerformStep: ( performStep ) => dispatch( actions.setShouldPerformStep( performStep ) )
     }
 }
 

@@ -6,6 +6,7 @@ export const UPDATE_NUM_OF_CLUSTERS = 'UPDATE_NUM_OF_CLUSTERS';
 export const SET_AUTOMATIC = 'SET_AUTOMATIC';
 export const SHOW_SETTINGS_MODAL = 'SHOW_SETTINGS_MODAL';
 export const UPDATE_GLOBAL_PROPS = 'UDPATE_GLOBAL_PROPS';
+export const SET_SHOULD_PERFORM_STEP = 'SET_SHOULD_PERFORM_STEP';
 
 // Action Creators
 export function advanceState() {
@@ -53,4 +54,11 @@ export function showSettingsModal( show ) {
         type: SHOW_SETTINGS_MODAL,
         show: show
     };   
+}
+
+export function setShouldPerformStep( performStep ) {
+    return {
+        type: SET_SHOULD_PERFORM_STEP,
+        performStep: performStep
+    }
 }

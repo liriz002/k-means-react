@@ -8,7 +8,8 @@ const initialState = {
     numOfClusters: Constants.Global.INITIAL_NUM_OF_CLUSTERS,
     isAutomatic: false,
     showSettingsModal: false,
-    pointsDistribution: "linear"
+    pointsDistribution: "linear",
+    shouldPerformStep: false
 }
 
 const globalProps = ( state = initialState, action ) => {
@@ -16,14 +17,15 @@ const globalProps = ( state = initialState, action ) => {
         case Actions.ADVANCE_APPLICATION_STATE:
             return { ...state, applicationState: state.applicationState + 1 };
         case Actions.RESET_APPLICATION_STATE:
-            console.log(state);
-            return { ...state, applicationState: Constants.ApplicationStates.RANDOMIZE, isAutomatic: false }
+            return { ...state, applicationState: Constants.ApplicationStates.RANDOMIZE, isAutomatic: false, shouldPerformStep: true };
         case Actions.SET_AUTOMATIC:
             return { ...state, isAutomatic: action.isAutomatic };
         case Actions.SHOW_SETTINGS_MODAL:
             return { ...state, showSettingsModal: action.show }
         case Actions.UPDATE_GLOBAL_PROPS:
             return { ...state, ...action.globalProps };
+        case Actions.SET_SHOULD_PERFORM_STEP:
+            return { ...state, shouldPerformStep: action.shouldPerformStep };
         default:
             return state;
     }
