@@ -8,8 +8,11 @@ const initialState = {
     numOfClusters: Constants.Global.INITIAL_NUM_OF_CLUSTERS,
     isAutomatic: false,
     showSettingsModal: false,
+    showSummaryModal: false,
     pointsDistribution: "linear",
-    shouldPerformStep: false
+    shouldPerformStep: false,
+    currentAlgorithmSteps: 0,
+    showResetButton: false,
 }
 
 const globalProps = ( state = initialState, action ) => {
@@ -17,15 +20,28 @@ const globalProps = ( state = initialState, action ) => {
         case Actions.ADVANCE_APPLICATION_STATE:
             return { ...state, applicationState: state.applicationState + 1 };
         case Actions.RESET_APPLICATION_STATE:
-            return { ...state, applicationState: Constants.ApplicationStates.RANDOMIZE, isAutomatic: false, shouldPerformStep: true };
+            return { 
+                ...state,
+                applicationState: Constants.ApplicationStates.RANDOMIZE,
+                isAutomatic: false,
+                shouldPerformStep: true,
+                currentAlgorithmSteps: 0,
+                showResetButton: false
+             };
         case Actions.SET_AUTOMATIC:
             return { ...state, isAutomatic: action.isAutomatic };
-        case Actions.SHOW_SETTINGS_MODAL:
+        case Actions.UPDATE_SHOW_SETTINGS_MODAL:
             return { ...state, showSettingsModal: action.show }
         case Actions.UPDATE_GLOBAL_PROPS:
             return { ...state, ...action.globalProps };
         case Actions.SET_SHOULD_PERFORM_STEP:
             return { ...state, shouldPerformStep: action.shouldPerformStep };
+        case Actions.INCREMENT_ALGORITHM_STEPS:
+            return { ...state, currentAlgorithmSteps: state.currentAlgorithmSteps + 1 };
+        case Actions.UPDATE_SHOW_RESET_BUTTON:
+            return { ...state, showResetButton: action.show }
+        case Actions.UPDATE_SHOW_SUMMARY_MODAL:
+            return { ...state, showSummaryModal: action.show }; 
         default:
             return state;
     }

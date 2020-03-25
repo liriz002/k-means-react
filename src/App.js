@@ -4,9 +4,9 @@ import MyChart from './components/Chart/Chart';
 import RadioButton from './components/UI/RadioButton/RadioButton';
 import Modal from 'react-modal';
 import { Connect, connect } from 'react-redux';
-import * as Constants from './constants/index';
 import Button from './components/UI/Button/Button';
 import * as actions from './store/actions/actions';
+import SummaryModal from './components/UI/Modals/SummaryModal';
 
 class App extends Component {
 
@@ -49,18 +49,26 @@ class App extends Component {
   }
 
   render() {
+
+    let summaryModal;
+    if ( this.props.showSummaryModal ) {
+      summaryModal = <SummaryModal isOpen={ true } />
+    }
+
     // IMPROVEMENT: save these repeated values in an object and iterate using "map"
     // let modal = 
+
+    // TODO: call modals conditionally. Otherwise, we are calculating things every time without using it
       return (
         <div className="App">
+          { summaryModal }
            
           <MyChart />
           <Modal closeTimeoutMS={500} isOpen={ this.props.showSettingsModal }>
           <div className="Modal-Title-Container">
             <h2>Chart Settings</h2>
          </div>
-      <br />
-      <div className="Modal-Controls-Container">
+      <div className="Modal-Content-Container">
       <h3>Points Distribution</h3>
       <div className="Radio-Btn-Container">
         <RadioButton
@@ -140,13 +148,14 @@ const mapStateToProps = state => {
   return {
     applicationState: state.globalProps.applicationState,
     showSettingsModal: state.globalProps.showSettingsModal,
-    globalProps: state.globalProps
+    globalProps: state.globalProps,
+    showSummaryModal: state.globalProps.showSummaryModal
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    onShowSettingsModal: ( show ) => dispatch( actions.showSettingsModal( show ) ),
+    onUpdateShowSettingsModal: ( show ) => dispatch( actions.updateShowSettingsModal( show ) ),
     onUpdateGlobalProps: ( props ) => dispatch( actions.updateGlobalProps( props ) ),
     onResetApplicationState: () => dispatch( actions.resetApplicationState() ),
     onUpdateChartData: ( datasets ) => dispatch(actions.updateChartData( datasets ))

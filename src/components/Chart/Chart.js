@@ -31,10 +31,7 @@ class MyChart extends Component {
                     labels: {
                         fontColor: '#333'
                     }
-                },
-                responsive: true,
-                
-                
+                },                
                 /*
                 scales: {
                     xAxes: [{
@@ -191,6 +188,12 @@ class MyChart extends Component {
 
             this.props.onUpdateChartData( datasets );
             this.updateChart( );
+
+            // Finally, we also increase the algorithm steps
+            // We do so with a timer so that the increase goes in sync with the chart motion
+            setTimeout(() => {
+                this.props.onIncrementAlgorithmSteps();
+            }, Constants.Global.AUTOMATIC_STEPS_INTERVAL / 2)
         }, 0);
     }
 
@@ -357,7 +360,11 @@ class MyChart extends Component {
     }
 
     showSettings = () => {
-        this.props.onShowSettingsModal( !this.props.showSettingsModal );
+        this.props.onUpdateShowSettingsModal( !this.props.showSettingsModal );
+    }
+
+    showSummary = () => {
+        this.props.onUpdateShowSummaryModal( !this.props.showSummaryModal );
     }
 
     render() {
@@ -368,6 +375,8 @@ class MyChart extends Component {
         let btnStyle = { opacity: 0 };
         let btnDefaultStyle = { opacity: spring(1 , { stiffness: Constants.ReactMotion.BTN_STIFFNESS, damping: Constants.ReactMotion.BTN_DAMPING })};
         let isDisabled = false;
+
+        // console.log(this.props.datasets);
 
         // Creates properties for buttons depending on the application state we're in
         switch( this.props.applicationState ) {
@@ -433,15 +442,23 @@ class MyChart extends Component {
 
             case Constants.ApplicationStates.FINISHED:
                 btn1Props = {
+                    title: "Summary",
+                    classes: button2Classes,
+                    clickFn: this.showSummary
+                }
+
+                btn2Props = {
                     title: "Reset",
                     classes: "Button Button3",
                     clickFn: this.reset
                 }
 
-                btn2Props = {
-                    title: "",
-                    classes: "hide",
-                    clickFn: (() =>{})
+                // If the reset button is not showing, we create a timeout to show it after
+                // the chart has finished its last animation
+                if ( !this.props.showResetButton ) {
+                    setTimeout(() => {
+                        this.props.onUpdateShowResetButton( true );
+                    }, Constants.Global.AUTOMATIC_STEPS_INTERVAL * 1.5 );
                 }
 
                 break;
@@ -460,6 +477,61 @@ class MyChart extends Component {
                 }
             }
 
+            // Then, we set the content of the left-hand side column based on whether the algorithm is finished
+            let leftColumnContent;
+
+            if ( this.props.applicationState == Constants.ApplicationStates.FINISHED )  {
+                leftColumnContent =
+                <Motion defaultStyle={ btnStyle } style={ btnDefaultStyle }>
+                { style => (
+                    <span style={{ opacity: style.opacity }} id="Finish-Lottie-Container">
+                        <span>You did it! Try again?</span>
+                    </span>
+                )}
+                </Motion>
+            
+            } else {
+                leftColumnContent =
+                <Motion defaultStyle={ btnStyle } style={ btnDefaultStyle }>
+                { style => (
+                    <span style={{ opacity: style.opacity }} id="Steps-Container">
+                        <span id="Steps-Label">Total Steps:</span> 
+                        <span id="Steps">{ this.props.currentAlgorithmSteps }</span>
+                    </span>
+                )}   
+                </Motion>
+            }
+
+            let button1 = <Motion key={ this.props.applicationState + '_1' } defaultStyle={ btnStyle } style={ btnDefaultStyle }>
+            { style => (
+                <Button 
+                    style={{ opacity: style.opacity }}
+                    title={ btn1Props.title }
+                    className={ btn1Props.classes }
+                    clicked={ btn1Props.clickFn }
+                    disabled = { this.props.isAutomatic && this.props.applicationState === Constants.ApplicationStates.STEPS }
+                />
+            )}
+            </Motion>
+
+            let button2 = <Motion key={ this.props.applicationState + '_2' } defaultStyle={ btnStyle } style={ btnDefaultStyle }>
+            { style => (
+                <Button 
+                    style={{ opacity: style.opacity }}
+                    title={ btn2Props.title }
+                    className={ btn2Props.classes }
+                    clicked={ btn2Props.clickFn }
+                    disabled = { isDisabled || ( this.props.isAutomatic && this.props.applicationState === Constants.ApplicationStates.STEPS ) }
+                />
+            )}
+            </Motion>
+
+            // Finally, if we are in the finished stage but we are not showing the reset button yet, we don't show any buttons
+            if ( this.props.applicationState == Constants.ApplicationStates.FINISHED && !this.props.showResetButton ) {
+                button1 = null;
+                button2 = null;
+            }
+
         return (
             <div>            
                 <div className="Chart">
@@ -468,37 +540,26 @@ class MyChart extends Component {
                     ref={this.chartRef}
                     />
                 </div> 
-                <Button
-                    className="Button SettingsButton"
-                    title="Settings"
-                    clicked={ this.showSettings }
-                    iconURL="https://image.flaticon.com/icons/svg/1790/1790042.svg"
-                    disabled={ this.props.isAutomatic && this.props.applicationState === Constants.ApplicationStates.STEPS }
-                />
+                <div>
+                <div className="Column Left-Column">
+                    { leftColumnContent }
+                </div>
+                <div className="Column Middle-Column">
 
-                <Motion key={ this.props.applicationState + '_1' } defaultStyle={ btnStyle } style={ btnDefaultStyle }>
-                { style => (
-                    <Button 
-                        style={{ opacity: style.opacity }}
-                        title={ btn1Props.title }
-                        className={ btn1Props.classes }
-                        clicked={ btn1Props.clickFn }
-                        disabled = { this.props.isAutomatic && this.props.applicationState === Constants.ApplicationStates.STEPS }
-                    />
-                )}
-                </Motion>
+                { button1 }
+                { button2 }
+                </div>
 
-                <Motion key={ this.props.applicationState + '_2' } defaultStyle={ btnStyle } style={ btnDefaultStyle }>
-                { style => (
-                    <Button 
-                        style={{ opacity: style.opacity }}
-                        title={ btn2Props.title }
-                        className={ btn2Props.classes }
-                        clicked={ btn2Props.clickFn }
-                        disabled = { isDisabled || ( this.props.isAutomatic && this.props.applicationState === Constants.ApplicationStates.STEPS ) }
+                <div className="Column Right-Column">
+                    <Button
+                        className="Button SettingsButton"
+                        title="Settings"
+                        clicked={ this.showSettings }
+                        iconURL="https://image.flaticon.com/icons/svg/1790/1790042.svg"
+                        disabled={ this.props.isAutomatic && this.props.applicationState === Constants.ApplicationStates.STEPS }
                     />
-                )}
-                </Motion>
+                </div>
+                </div>
             </div>
         );
     }
@@ -506,6 +567,10 @@ class MyChart extends Component {
 
 const mapStateToProps = state => {
     /*
+
+     <BasicLottieComponent className="Finish-Lottie" />
+
+               
 
                 <div style={{ display: 'inline-block', position: 'relative', bottom: '40px', float: 'left' }}>
                     <BasicLottieComponent />
@@ -522,7 +587,10 @@ const mapStateToProps = state => {
         datasets: state.data.datasets,
         showSettingsModal: state.globalProps.showSettingsModal,
         shouldPerformStep: state.globalProps.shouldPerformStep,
-        pointsDistribution: state.globalProps.pointsDistribution
+        pointsDistribution: state.globalProps.pointsDistribution,
+        currentAlgorithmSteps: state.globalProps.currentAlgorithmSteps,
+        showResetButton: state.globalProps.showResetButton,
+        showSummaryModal: state.globalProps.showSummaryModal
     }
 }
 
@@ -532,8 +600,11 @@ const mapDispatchToProps = dispatch => {
         onUpdateChartData: ( datasets ) => dispatch(actions.updateChartData( datasets )),
         onSetAutomatic: ( isAutomatic ) => dispatch( actions.setAutomatic( isAutomatic ) ),
         onResetApplicationState: () => dispatch( actions.resetApplicationState() ),
-        onShowSettingsModal: ( show ) => dispatch( actions.showSettingsModal( show ) ),
-        onSetShouldPerformStep: ( performStep ) => dispatch( actions.setShouldPerformStep( performStep ) )
+        onUpdateShowSettingsModal: ( show ) => dispatch( actions.updateShowSettingsModal( show ) ),
+        onSetShouldPerformStep: ( performStep ) => dispatch( actions.setShouldPerformStep( performStep ) ),
+        onIncrementAlgorithmSteps: () => dispatch( actions.incrementAlgorithmSteps() ),
+        onUpdateShowResetButton: ( show ) => dispatch( actions.updateShowResetButton( show ) ),
+        onUpdateShowSummaryModal: ( show ) => dispatch( actions.updateShowSummaryModal( show ) )
     }
 }
 

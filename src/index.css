@@ -68,12 +68,50 @@ h1 {
   padding: 20px;
 }
 
-.Modal-Controls-Container {
-  padding: 0px 20px;
-}
+
 
 .Radio-Btn-Container {
   display: flex;
   margin-bottom: 17px;
   margin-top: 3px;
+}
+
+.Column {
+  float: left;
+  width: 33%;
+}
+
+.Left-Column {
+  text-align: left;
+  padding-left: 33px;
+  display: flex;
+  align-items: center;
+  height: 42px;
+}
+
+#Steps-Container {
+  display: flex;
+  align-items: center;
+  background-color: #F7FAFC;
+  border-radius: 10px;
+  padding: 4px 15px;
+  height: 44px;
+}
+
+#Steps-Label {
+  font-weight: bold;
+  font-size: 14px;
+  color: #818796;
+}
+
+#Steps {
+  margin-left: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #6779D9;
+}
+
+#Finish-Lottie-Container {
+  display: flex;
+  align-items: center;
 }

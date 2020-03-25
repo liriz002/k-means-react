@@ -4,9 +4,12 @@ export const RESET_APPLICATION_STATE = 'RESET_APPLICATION_STATE';
 export const UPDATE_CHART_DATA = 'UPDATE_CHART_DATA';
 export const UPDATE_NUM_OF_CLUSTERS = 'UPDATE_NUM_OF_CLUSTERS';
 export const SET_AUTOMATIC = 'SET_AUTOMATIC';
-export const SHOW_SETTINGS_MODAL = 'SHOW_SETTINGS_MODAL';
+export const UPDATE_SHOW_SETTINGS_MODAL = 'UPDATE_SHOW_SETTINGS_MODAL';
 export const UPDATE_GLOBAL_PROPS = 'UDPATE_GLOBAL_PROPS';
 export const SET_SHOULD_PERFORM_STEP = 'SET_SHOULD_PERFORM_STEP';
+export const INCREMENT_ALGORITHM_STEPS = 'INCREMENT_ALGORITHM_STEPS';
+export const UPDATE_SHOW_RESET_BUTTON = 'UPDATE_SHOW_RESET_BUTTON';
+export const UPDATE_SHOW_SUMMARY_MODAL = 'UPDATE_SHOW_SUMMARY_MODAL';
 
 // Action Creators
 export function advanceState() {
@@ -49,9 +52,9 @@ export function setAutomatic( isAutomatic ) {
     }
 }
 
-export function showSettingsModal( show ) {
+export function updateShowSettingsModal( show ) {
     return { 
-        type: SHOW_SETTINGS_MODAL,
+        type: UPDATE_SHOW_SETTINGS_MODAL,
         show: show
     };   
 }
@@ -62,3 +65,23 @@ export function setShouldPerformStep( performStep ) {
         performStep: performStep
     }
 }
+
+export function incrementAlgorithmSteps() {
+    return {
+        type: INCREMENT_ALGORITHM_STEPS
+    }
+}
+
+export function updateShowResetButton( show ) {
+    return {
+        type: UPDATE_SHOW_RESET_BUTTON,
+        show: show
+    }
+}
+
+export function updateShowSummaryModal( show ) {
+    return {
+        type: UPDATE_SHOW_SUMMARY_MODAL,
+        show: show
+    };
+};
