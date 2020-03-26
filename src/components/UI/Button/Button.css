@@ -73,13 +73,14 @@
 }
 
 .SettingsButton {
-    position: absolute;
-    right: 5px;
     display: flex;
     align-items: center;
     width: 150px;
     color: #8898AA;
     text-transform: none;
+    margin-left: auto;
+    position: relative;
+    top: 4px;
 }
 
 .Button div {
@@ -96,8 +97,4 @@
 .Icon {
     height: 19px;
     width: auto;
-}
-
-.Modal-Cancel-Btn {
-    margin-right: 16px;
 }

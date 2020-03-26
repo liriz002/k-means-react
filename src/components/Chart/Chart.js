@@ -367,11 +367,15 @@ class MyChart extends Component {
         this.props.onUpdateShowSummaryModal( !this.props.showSummaryModal );
     }
 
+    showExplainer = () => {
+        this.props.onUpdateShowExplainerModal( !this.props.showExplainerModal );
+    }
+
     render() {
         let btn1Props = {};
         let btn2Props = {};
-        let button1Classes = "Button Button1";
-        let button2Classes = "Button Button2";
+        let button1Classes = Constants.Global.BUTTON_LEFT_CLASSES;
+        let button2Classes = Constants.Global.BUTTON_RIGHT_CLASSES;
         let btnStyle = { opacity: 0 };
         let btnDefaultStyle = { opacity: spring(1 , { stiffness: Constants.ReactMotion.BTN_STIFFNESS, damping: Constants.ReactMotion.BTN_DAMPING })};
         let isDisabled = false;
@@ -382,16 +386,17 @@ class MyChart extends Component {
         switch( this.props.applicationState ) {
             case Constants.ApplicationStates.BEGIN:
                 btn1Props = {
-                    title: "Get started",
+                    title: "How It Works",
                     classes: button1Classes,
-                    clickFn: this.props.onAdvanceState
+                    clickFn: this.showExplainer
                 }
 
                 btn2Props = {
-                    title: "",
-                    classes: "hide",
-                    clickFn: (() =>{})
+                    title: "Get started",
+                    classes: button2Classes,
+                    clickFn: this.props.onAdvanceState
                 }
+
                 break;
 
             case Constants.ApplicationStates.RANDOMIZE:
@@ -540,17 +545,17 @@ class MyChart extends Component {
                     ref={this.chartRef}
                     />
                 </div> 
-                <div>
-                <div className="Column Left-Column">
+                <div className="Controls">
+                <span className="Column Left-Column">
                     { leftColumnContent }
-                </div>
-                <div className="Column Middle-Column">
+                </span>
+                <span className="Column Middle-Column">
 
                 { button1 }
                 { button2 }
-                </div>
+                </span>
 
-                <div className="Column Right-Column">
+                <span className="Column Right-Column">
                     <Button
                         className="Button SettingsButton"
                         title="Settings"
@@ -558,7 +563,7 @@ class MyChart extends Component {
                         iconURL="https://image.flaticon.com/icons/svg/1790/1790042.svg"
                         disabled={ this.props.isAutomatic && this.props.applicationState === Constants.ApplicationStates.STEPS }
                     />
-                </div>
+                </span>
                 </div>
             </div>
         );
@@ -590,7 +595,8 @@ const mapStateToProps = state => {
         pointsDistribution: state.globalProps.pointsDistribution,
         currentAlgorithmSteps: state.globalProps.currentAlgorithmSteps,
         showResetButton: state.globalProps.showResetButton,
-        showSummaryModal: state.globalProps.showSummaryModal
+        showSummaryModal: state.globalProps.showSummaryModal,
+        showExplainerModal: state.globalProps.showExplainerModal
     }
 }
 
@@ -604,7 +610,8 @@ const mapDispatchToProps = dispatch => {
         onSetShouldPerformStep: ( performStep ) => dispatch( actions.setShouldPerformStep( performStep ) ),
         onIncrementAlgorithmSteps: () => dispatch( actions.incrementAlgorithmSteps() ),
         onUpdateShowResetButton: ( show ) => dispatch( actions.updateShowResetButton( show ) ),
-        onUpdateShowSummaryModal: ( show ) => dispatch( actions.updateShowSummaryModal( show ) )
+        onUpdateShowSummaryModal: ( show ) => dispatch( actions.updateShowSummaryModal( show ) ),
+        onUpdateShowExplainerModal: ( show ) => dispatch( actions.updateShowExplainerModal( show ) )
     }
 }
 

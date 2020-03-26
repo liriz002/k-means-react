@@ -9,6 +9,7 @@ const initialState = {
     isAutomatic: false,
     showSettingsModal: false,
     showSummaryModal: false,
+    showExplainerModal: false,
     pointsDistribution: "linear",
     shouldPerformStep: false,
     currentAlgorithmSteps: 0,
@@ -42,6 +43,8 @@ const globalProps = ( state = initialState, action ) => {
             return { ...state, showResetButton: action.show }
         case Actions.UPDATE_SHOW_SUMMARY_MODAL:
             return { ...state, showSummaryModal: action.show }; 
+        case Actions.UPDATE_SHOW_EXPLAINER_MODAL:
+            return { ...state, showExplainerModal: action.show };
         default:
             return state;
     }

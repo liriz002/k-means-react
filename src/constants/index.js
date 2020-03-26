@@ -8,7 +8,11 @@ export const Global = {
     INITIAL_POINTS_DISTRIBUTION: "linear",
     SCATTERED_DATA_X_MULTIPLIER: 119,
     SCATTERED_DATA_Y_MULTIPLIER: 139,
-    MODAL_CLOSE_DURATION: 500
+    MODAL_CLOSE_DURATION: 500,
+    STEPS_AVERAGE_MIN: 5,
+    STEPS_AVERAGE_MAX: 10,
+    BUTTON_LEFT_CLASSES: "Button Button1",
+    BUTTON_RIGHT_CLASSES: "Button Button2"
 }
 
 export const ChartProps = {
@@ -31,15 +35,17 @@ export const Colors = {
         { border: 'rgb(54, 162, 235)', background: 'rgba(54, 162, 235, 0.3)' },
         { border: 'rgb(255, 99, 132)', background: 'rgba(255, 99, 132, 0.3)' },
         { border: 'rgb(255, 187, 51)', background: 'rgba(255, 187, 51, 0.3)' },
-        { border: 'rgb(0, 195, 79)', background: 'rgb(0, 195, 79, 0.3)' },
-        { border: 'rgb(86, 52, 255)', background: 'rgb(86, 52, 255, 0.3)' }
+        { border: 'rgb(0, 195, 79)', background: 'rgba(0, 195, 79, 0.3)' },
+        { border: 'rgb(86, 52, 255)', background: 'rgba(86, 52, 255, 0.3)' },
+        { border: 'rgb(248,98,0)', background: 'rgba(248,98,0, 0.3)' }
     ],
     Centroids: [
         { border: 'rgb(54, 162, 235)', background: 'rgba(54, 162, 235, 0.7)' },
         { border: 'rgb(255, 99, 132)', background: 'rgba(255, 99, 132, 0.7)' },
         { border: 'rgb(255, 187, 51)', background: 'rgba(255, 187, 51, 0.7)' },
-        { border: 'rgb(0, 195, 79)', background: 'rgb(0, 195, 79, 0.7)' },
-        { border: 'rgb(86, 52, 255)', background: 'rgb(86, 52, 255, 0.7)' }
+        { border: 'rgb(0, 195, 79)', background: 'rgba(0, 195, 79, 0.7)' },
+        { border: 'rgb(86, 52, 255)', background: 'rgba(86, 52, 255, 0.7)' },
+        { border: 'rgb(248,98,0)', background: 'rgba(248,98,0, 0.3)' }
     ]
 };
 
@@ -81,6 +87,14 @@ export const Styles = {
             label: 'Cluster 5',
             //borderColor: Colors.Points[4].border,
             backgroundColor: Colors.Points[4].background,
+            pointRadius: ChartProps.POINT_RADIUS,
+            borderWidth: ChartProps.POINT_BORDER_WIDTH,
+            pointStyle: ChartProps.GROUP_3_POINT_STYLE
+        },
+        {
+            label: 'Cluster 6',
+            //borderColor: Colors.Points[5].border,
+            backgroundColor: Colors.Points[5].background,
             pointRadius: ChartProps.POINT_RADIUS,
             borderWidth: ChartProps.POINT_BORDER_WIDTH,
             pointStyle: ChartProps.GROUP_3_POINT_STYLE
@@ -126,12 +140,20 @@ export const Styles = {
             pointRadius: ChartProps.CENTROID_RADIUS,
             pointStyle: ChartProps.GROUP_3_POINT_STYLE,
             borderWidth: ChartProps.CENTROID_BORDER_WIDTH,
+        },
+        {
+            label: 'Centroid 6',
+            borderColor: Colors.Centroids[5].border,
+            backgroundColor: Colors.Centroids[5].background,
+            pointRadius: ChartProps.CENTROID_RADIUS,
+            pointStyle: ChartProps.GROUP_3_POINT_STYLE,
+            borderWidth: ChartProps.CENTROID_BORDER_WIDTH,
         }
     ],
     Unassigned: [
         {
             label: 'Unassigned',
-            borderColor: 'rgb(135, 140, 145)',
+            // borderColor: 'rgb(135, 140, 145)',
             backgroundColor: 'rgba(135, 140, 145, 0.2)',
             pointRadius: ChartProps.POINT_RADIUS,
             pointStyle: 'circle'

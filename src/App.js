@@ -7,6 +7,7 @@ import { Connect, connect } from 'react-redux';
 import Button from './components/UI/Button/Button';
 import * as actions from './store/actions/actions';
 import SummaryModal from './components/UI/Modals/SummaryModal';
+import ExplainerModal from './components/UI/Modals/ExplainerModal';
 
 class App extends Component {
 
@@ -50,10 +51,7 @@ class App extends Component {
 
   render() {
 
-    let summaryModal;
-    if ( this.props.showSummaryModal ) {
-      summaryModal = <SummaryModal isOpen={ true } />
-    }
+    console.log(this.props.showExplainerModal);
 
     // IMPROVEMENT: save these repeated values in an object and iterate using "map"
     // let modal = 
@@ -61,7 +59,8 @@ class App extends Component {
     // TODO: call modals conditionally. Otherwise, we are calculating things every time without using it
       return (
         <div className="App">
-          { summaryModal }
+          <SummaryModal isOpen={ this.props.showSummaryModal } />
+          <ExplainerModal isOpen={ this.props.showExplainerModal } />
            
           <MyChart />
           <Modal closeTimeoutMS={500} isOpen={ this.props.showSettingsModal }>
@@ -121,13 +120,21 @@ class App extends Component {
           label="5"
           value="5"
         />
+
+        <RadioButton
+          changed={ this.updateNumberOfClusters }
+          id="6"
+          isSelected={ this.state.numOfClusters == 6 }
+          label="6"
+          value="6"
+        />
         </div>
         <hr />
       </div>
   
         <div className="Modal-Btn-Container">
         <Button 
-          className="Button Button3 Modal-Cancel-Btn"
+          className="Button Button3 Modal-Right-Button"
           title="Cancel"
           clicked={ this.cancelSettings }
         />
@@ -149,7 +156,8 @@ const mapStateToProps = state => {
     applicationState: state.globalProps.applicationState,
     showSettingsModal: state.globalProps.showSettingsModal,
     globalProps: state.globalProps,
-    showSummaryModal: state.globalProps.showSummaryModal
+    showSummaryModal: state.globalProps.showSummaryModal,
+    showExplainerModal: state.globalProps.showExplainerModal
   };
 };
 

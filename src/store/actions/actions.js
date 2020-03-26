@@ -10,6 +10,7 @@ export const SET_SHOULD_PERFORM_STEP = 'SET_SHOULD_PERFORM_STEP';
 export const INCREMENT_ALGORITHM_STEPS = 'INCREMENT_ALGORITHM_STEPS';
 export const UPDATE_SHOW_RESET_BUTTON = 'UPDATE_SHOW_RESET_BUTTON';
 export const UPDATE_SHOW_SUMMARY_MODAL = 'UPDATE_SHOW_SUMMARY_MODAL';
+export const UPDATE_SHOW_EXPLAINER_MODAL = 'UPDATE_SHOW_EXPLAINER_MODAL';
 
 // Action Creators
 export function advanceState() {
@@ -85,3 +86,10 @@ export function updateShowSummaryModal( show ) {
         show: show
     };
 };
+
+export function updateShowExplainerModal( show ) {
+    return {
+        type: UPDATE_SHOW_EXPLAINER_MODAL,
+        show: show
+    };
+}
