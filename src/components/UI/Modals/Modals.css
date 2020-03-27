@@ -74,7 +74,7 @@
   }
 
   #Explainer-Modal {
-    height: 400px;
+    height: 432px;
   }
 
   .Pagination-Container {
@@ -84,3 +84,46 @@
     width: 20%;
     text-align: center;
   }
+
+  .ReactModal__Overlay {
+    opacity: 0;
+    transition: opacity 500ms ease-in-out;
+  }
+
+  .ReactModal__Overlay hr {
+    border-top-style: none;
+  }
+  
+  .ReactModal__Overlay--after-open{
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.80) !important;
+  }
+  
+  .ReactModal__Overlay--before-close{
+    opacity: 0;
+  }
+  
+  .ReactModal__Content {
+    width: 40%;
+    height: 310px;
+    padding: 0px !important;
+    border-radius: 10px !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    border: none !important;
+  }
+  
+  .Modal-Btn-Container .Button {
+    float: right;
+    margin-top: 8px;
+  }
+  
+  .Modal-Title-Container {
+    background-image: linear-gradient(to right, #53f, #0BD1FF);
+    color: white;
+    font-weight: bold;
+    padding: 20px;
+  }
+  

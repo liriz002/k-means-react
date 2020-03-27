@@ -24,13 +24,13 @@ class SummaryModal extends Component {
         // Then, we also get the steps message
         if ( this.props.currentAlgorithmSteps < Constants.Global.STEPS_AVERAGE_MIN ) {
             // low
-            stepsMessage = <span className="Steps-Message Steps-Low">(low)</span>
+            stepsMessage = <span className="Steps-Message Steps-Low">(fast)</span>
         } else if ( this.props.currentAlgorithmSteps >= Constants.Global.STEPS_AVERAGE_MIN && this.props.currentAlgorithmSteps <= Constants.Global.STEPS_AVERAGE_MAX ) {
             // average
             stepsMessage = <span className="Steps-Message Steps-Average">(average)</span>
         } else {
             // high
-            stepsMessage = <span className="Steps-Message Steps-High">(high)</span>
+            stepsMessage = <span className="Steps-Message Steps-High">(slow)</span>
         }
 
         // Then we determine the total height for the modal, based on whether we have more than 3 points

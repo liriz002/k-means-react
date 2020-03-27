@@ -34,13 +34,11 @@ class ExplainerModal extends Component {
     render() {
         let modalContent;
         let btnLeftProps;
-        let btnRightProps;
-
-
+        let btnClasses = Constants.Global.BUTTON_LEFT_CLASSES + " Modal-Right-Button"
 
         if ( this.state.currentPage == 0 ) {
             modalContent =
-            <div className="Modal-Content-Container">                 
+            <div>                 
             <div className="Modal-Section">
                 <h3>K-Means Clustering</h3>
                 <p>This project is an implementation of the k-means clustering algorithm, a popular machine learning algorithm.</p>
@@ -48,57 +46,46 @@ class ExplainerModal extends Component {
     
             <div className="Modal-Section">
                 <h3>What Does K-Means Clustering Do?</h3>
-                <p>The k-means algorithm is used to group similar data points into clusters (groups). Clusters are composed
-                    of a centroid and a collection of points.</p>
+                <p>K-means clustering is used to group similar data points into clusters (groups). Similarity between points is given by their distance to a given cluster center (centroid).</p><br />
+                <p>Clusters are represented by different colors in the chart.</p>
             </div>
             </div>
 
             btnLeftProps = {
-                title: "Steps",
-                classes: Constants.Global.BUTTON_LEFT_CLASSES,
+                title: "Next",
+                classes: btnClasses,
                 clickFn: this.advancePage
-            }
-
-            btnRightProps = {
-                title: "Close",
-                classes: Constants.Global.BUTTON_RIGHT_CLASSES + " hide",
             }
         } else if ( this.state.currentPage == 1 ) {
             modalContent =    
-            <div className="Modal-Content-Container">                 
+            <div>                 
             <div className="Modal-Section">
-                <h3>What are the algorithm steps?</h3>
-                <p>After creating data points and placing centroids randomly, the first step consists of assigning points to the closest centroid.</p> <br />
-                <p>The second step consists of re-calculating the position of the centroids and moving each to its corresponding new position.</p>
+                <h3>Initializing Data</h3>
+                <p>To start, 100 unassigned data points and K centroids (3 by default) are placed. You can shuffle this data as you see fit.</p>
             </div>
-
             <div className="Modal-Section">
-                <h3>In this project...</h3>
-                <p>A full step consists of performing the 2 steps above in conjunction.</p>
+                <h3>Algorithm Steps</h3>
+                <p>The first step consists of assigning points to the closest centroid. The second step consists of re-calculating the average position of all centroids.</p><br />
+                <p>Once points stop switching clusters, the algorithm ends.</p>
             </div>
             </div>
 
             btnLeftProps = {
-                title: "Tips",
-                classes: Constants.Global.BUTTON_LEFT_CLASSES,
+                title: "Next",
+                classes: btnClasses,
                 clickFn: this.advancePage
-            }
-
-            btnRightProps = {
-                title: "Close",
-                classes: Constants.Global.BUTTON_RIGHT_CLASSES + " hide",
             }
         } else {
             modalContent =
-            <div className="Modal-Content-Container">                 
+            <div>                 
             <div className="Modal-Section">
                 <h3>Settings</h3>
-                <p>In the settings, you can change the points distribution and the number of clusters to use.</p>
+                <p>In the settings, you can change the points' distribution and the number of clusters to use.</p>
             </div>
 
             <div className="Modal-Section">
-            <h3>Steps</h3>
-            <p>You can choose to perform a manual step (assignment + repositioning) or have it done automatically (all steps) until the algorithm is done.</p>
+            <h3>Managing Steps</h3>
+            <p>You can choose to perform a full step (assignment + repositioning) manually,  or you can have all steps complete automatically until the algorithm is done.</p>
             </div>
 
             <div className="Modal-Section">
@@ -108,17 +95,10 @@ class ExplainerModal extends Component {
 
             btnLeftProps = {
                 title: "Let's go!",
-                classes: Constants.Global.BUTTON_LEFT_CLASSES,
+                classes: btnClasses,
                 clickFn: this.closeModal
             }
-
-            btnRightProps = {
-                title: "Close",
-                classes: Constants.Global.BUTTON_RIGHT_CLASSES + " hide",
-            }
         }
-
-        console.log(btnLeftProps);
 
         return (
             <div>
@@ -126,7 +106,7 @@ class ExplainerModal extends Component {
                 <div className="Modal-Title-Container">
                     <h2>How It Works</h2>
                 </div>
-                <div >
+                <div className="Modal-Content-Container"> 
                 <Motion key={ this.state.currentPage } defaultStyle={ { opacity: 0 } } style={ { opacity: spring(1 , { stiffness: Constants.ReactMotion.BTN_STIFFNESS, damping: Constants.ReactMotion.BTN_DAMPING })} }>
                 { style => (
                     <div style={{ opacity: style.opacity }}>{ modalContent }</div>
@@ -140,22 +120,18 @@ class ExplainerModal extends Component {
                         <span className={ "Pagination-Dot " + ( this.state.currentPage == 2 ? "Active" : "" ) }></span>
                     </div>
                 </div>
+                <br />
+                <hr />
+                </div>
+
 
                     <div className="Modal-Btn-Container">
-
-                    <Button
-                        title={ btnRightProps.title }
-                        className={ btnRightProps.classes }
-                        clicked={ btnRightProps.clickFn }
-                    />
-
-                    <Button
-                        title={ btnLeftProps.title }
-                        className={ btnLeftProps.classes }
-                        clicked={ btnLeftProps.clickFn }
-                    />
+                        <Button
+                            title={ btnLeftProps.title }
+                            className={ btnLeftProps.classes }
+                            clicked={ btnLeftProps.clickFn }
+                        />
                     </div>
-                </div>
                 </Modal>
             </div>
         );

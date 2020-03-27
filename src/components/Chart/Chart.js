@@ -484,12 +484,12 @@ class MyChart extends Component {
 
             // Then, we set the content of the left-hand side column based on whether the algorithm is finished
             let leftColumnContent;
-
             if ( this.props.applicationState == Constants.ApplicationStates.FINISHED )  {
                 leftColumnContent =
-                <Motion defaultStyle={ btnStyle } style={ btnDefaultStyle }>
+                <Motion  key={ this.props.applicationState }  defaultStyle={ btnStyle } style={ btnDefaultStyle }>
                 { style => (
                     <span style={{ opacity: style.opacity }} id="Finish-Lottie-Container">
+                       
                         <span>You did it! Try again?</span>
                     </span>
                 )}

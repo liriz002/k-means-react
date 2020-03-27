@@ -22,7 +22,7 @@
 }
 
 .Button:hover, .SettingsButton:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
 }
 
 .Button:disabled, .Button:disabled:hover {
