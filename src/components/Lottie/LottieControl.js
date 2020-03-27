@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Lottie } from '@crello/react-lottie';
 import animationData from '../Lottie/fireworks.json';
 

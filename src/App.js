@@ -19,7 +19,6 @@ class App extends Component {
 
   // Updates the state's window width
   updateWidth = () => {
-    console.log('update width');
     this.setState({
       windowWidth: window.innerWidth
     });

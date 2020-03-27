@@ -7,7 +7,7 @@ const button = (props) => {
 
     if ( props.iconURL ) {
         innerHTML = <div>
-                <img className="Icon" src={ props.iconURL } />
+                <img className="Icon" src={ props.iconURL } alt="Settings Icon" />
                 <span>{ title }</span>
             </div>
     }

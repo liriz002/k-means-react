@@ -484,7 +484,7 @@ class MyChart extends Component {
 
             // Then, we set the content of the left-hand side column based on whether the algorithm is finished
             let leftColumnContent;
-            if ( this.props.applicationState == Constants.ApplicationStates.FINISHED )  {
+            if ( this.props.applicationState === Constants.ApplicationStates.FINISHED )  {
                 leftColumnContent =
                 <Motion  key={ this.props.applicationState }  defaultStyle={ btnStyle } style={ btnDefaultStyle }>
                 { style => (
@@ -532,7 +532,7 @@ class MyChart extends Component {
             </Motion>
 
             // Finally, if we are in the finished stage but we are not showing the reset button yet, we don't show any buttons
-            if ( this.props.applicationState == Constants.ApplicationStates.FINISHED && !this.props.showResetButton ) {
+            if ( this.props.applicationState === Constants.ApplicationStates.FINISHED && !this.props.showResetButton ) {
                 button1 = null;
                 button2 = null;
             }

@@ -36,7 +36,7 @@ class ExplainerModal extends Component {
         let btnLeftProps;
         let btnClasses = Constants.Global.BUTTON_LEFT_CLASSES + " Modal-Right-Button"
 
-        if ( this.state.currentPage == 0 ) {
+        if ( this.state.currentPage === 0 ) {
             modalContent =
             <div>                 
             <div className="Modal-Section">
@@ -56,7 +56,7 @@ class ExplainerModal extends Component {
                 classes: btnClasses,
                 clickFn: this.advancePage
             }
-        } else if ( this.state.currentPage == 1 ) {
+        } else if ( this.state.currentPage === 1 ) {
             modalContent =    
             <div>                 
             <div className="Modal-Section">
@@ -115,9 +115,9 @@ class ExplainerModal extends Component {
 
                 <div>
                     <div className="Pagination-Container">
-                        <span className={ "Pagination-Dot " + ( this.state.currentPage == 0 ? "Active" : "" ) }></span>
-                        <span className={ "Pagination-Dot " + ( this.state.currentPage == 1 ? "Active" : "" ) }></span>
-                        <span className={ "Pagination-Dot " + ( this.state.currentPage == 2 ? "Active" : "" ) }></span>
+                        <span className={ "Pagination-Dot " + ( this.state.currentPage === 0 ? "Active" : "" ) }></span>
+                        <span className={ "Pagination-Dot " + ( this.state.currentPage === 1 ? "Active" : "" ) }></span>
+                        <span className={ "Pagination-Dot " + ( this.state.currentPage === 2 ? "Active" : "" ) }></span>
                     </div>
                 </div>
                 <br />
