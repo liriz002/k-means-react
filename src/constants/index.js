@@ -12,7 +12,8 @@ export const Global = {
     STEPS_AVERAGE_MIN: 5,
     STEPS_AVERAGE_MAX: 10,
     BUTTON_LEFT_CLASSES: "Button Button1",
-    BUTTON_RIGHT_CLASSES: "Button Button2"
+    BUTTON_RIGHT_CLASSES: "Button Button2",
+    MIN_WINDOW_WIDTH: 992
 }
 
 export const ChartProps = {

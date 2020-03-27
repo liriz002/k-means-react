@@ -81,6 +81,8 @@
     margin-left: auto;
     position: relative;
     top: 4px;
+    border: 1px solid lightgrey;
+    background-color: white;
 }
 
 .Button div {
