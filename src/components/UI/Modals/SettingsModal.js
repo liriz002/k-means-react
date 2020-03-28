@@ -47,7 +47,7 @@ class SettingsModal extends Component {
     render() {
         return (
             <div>
-                <Modal closeTimeoutMS={500} isOpen={ this.props.isOpen }>
+                <Modal closeTimeoutMS={500} isOpen={ this.props.isOpen } ariaHideApp={false}>
                     <div className="Modal-Title-Container">
                         <h2>Chart Settings</h2>
                     </div>

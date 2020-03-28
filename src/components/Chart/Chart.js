@@ -6,7 +6,10 @@ import Button from '../UI/Button/Button';
 import { Motion, spring } from 'react-motion';
 import { connect } from 'react-redux';
 import * as actions from '../../store/actions/actions';
+/*
 import { BasicLottieComponent } from '../Lottie/LottieControl';
+import { Lottie } from '@crello/react-lottie';
+*/
 
 class MyChart extends Component {
     chartRef = React.createRef();
@@ -377,7 +380,7 @@ class MyChart extends Component {
         let button1Classes = Constants.Global.BUTTON_LEFT_CLASSES;
         let button2Classes = Constants.Global.BUTTON_RIGHT_CLASSES;
         let btnStyle = { opacity: 0 };
-        let btnDefaultStyle = { opacity: spring(1 , { stiffness: Constants.ReactMotion.BTN_STIFFNESS, damping: Constants.ReactMotion.BTN_DAMPING })};
+        let btnDefaultStyle = { opacity: spring(1)};
         let isDisabled = false;
 
         // console.log(this.props.datasets);
@@ -448,7 +451,7 @@ class MyChart extends Component {
             case Constants.ApplicationStates.FINISHED:
                 btn1Props = {
                     title: "Summary",
-                    classes: button2Classes,
+                    classes: button1Classes,
                     clickFn: this.showSummary
                 }
 
@@ -486,15 +489,16 @@ class MyChart extends Component {
             let leftColumnContent;
             if ( this.props.applicationState === Constants.ApplicationStates.FINISHED )  {
                 leftColumnContent =
-                <Motion  key={ this.props.applicationState }  defaultStyle={ btnStyle } style={ btnDefaultStyle }>
+                <Motion  key={ this.props.applicationState }  defaultStyle={{ x: -300, opacity: 0 }  } style={ { x: spring(0, { stiffness: 120, damping: 11 } ), opacity: 1 } }>
                 { style => (
-                    <span style={{ opacity: style.opacity }} id="Finish-Lottie-Container">
-                       
-                        <span>You did it! Try again?</span>
-                    </span>
+                    <div style={{ 
+                                transform: `translateX(${style.x}px)`,
+                                opacity: style.opacity
+                            }}>
+                        <span>Nice job! Try again?</span>
+                    </div>
                 )}
                 </Motion>
-            
             } else {
                 leftColumnContent =
                 <Motion defaultStyle={ btnStyle } style={ btnDefaultStyle }>

@@ -39,24 +39,24 @@
 
 .Button1 {
     background-color: white;
-    color: #3ecf8e;
-    border: 2px solid #3ecf8e;
+    color: #36a3eb;
+    border: 2px solid #36a3eb;
 }
 
 .Button1:hover {
-    background-color: #3ecf8e;
+    background-color: #36a3eb;;
     color: white;
     /* green #3ecf8e */
 }
 
 .Button2 {
     background-color: white;
-    color: #53f;
-    border: 2px solid #53f;
+    color: #6779D9;
+    border: 2px solid #6779D9;
 }
 
 .Button2:hover {
-    background-color: #53f;
+    background-color: #6779D9;
     color: white;
 
 }

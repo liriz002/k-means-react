@@ -29,7 +29,7 @@ $md-radio-ripple-size: 15px;
 
         &:checked + label:before {
             border-color: $md-radio-checked-color;
-            animation: ripple 0.2s linear forwards;   
+            animation: ripple 0.20s linear forwards;   
         }
 
         &:checked + label:after {

@@ -102,7 +102,7 @@ class ExplainerModal extends Component {
 
         return (
             <div>
-                <Modal id="Explainer-Modal" isOpen={ this.props.isOpen } closeTimeoutMS={ Constants.Global.MODAL_CLOSE_DURATION }>
+                <Modal id="Explainer-Modal" isOpen={ this.props.isOpen } closeTimeoutMS={ Constants.Global.MODAL_CLOSE_DURATION } ariaHideApp={false}>
                 <div className="Modal-Title-Container">
                     <h2>How It Works</h2>
                 </div>

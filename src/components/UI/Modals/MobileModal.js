@@ -4,7 +4,7 @@ import Modal from 'react-modal';
 class MobileModal extends Component {
     render() {
         return (
-            <Modal id="Mobile-Modal" isOpen={ this.props.isOpen }>
+            <Modal id="Mobile-Modal" isOpen={ this.props.isOpen } ariaHideApp={false}>
                 <div className="Modal-Title-Container">
                     <h2>No Way, Jose</h2>
                 </div>

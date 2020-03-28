@@ -42,7 +42,7 @@ class SummaryModal extends Component {
 
         return (
             <div>
-            <Modal id={ modalHeightID } isOpen={ this.props.isOpen } closeTimeoutMS={ Constants.Global.MODAL_CLOSE_DURATION }>
+            <Modal id={ modalHeightID } isOpen={ this.props.isOpen } closeTimeoutMS={ Constants.Global.MODAL_CLOSE_DURATION } ariaHideApp={false}>
             <div className="Modal-Title-Container">
                 <h2>Summary</h2>
              </div>
@@ -52,7 +52,7 @@ class SummaryModal extends Component {
                     <h3>Cluster Assignments</h3>
                     { pointsPerCluster.map( ( points, index ) => { 
                         return (
-                            <span className="Point-Summary"><span className="Dot" style={{ backgroundColor: Constants.Colors.Points[ index ].background }} ></span><span className="Points-Total">{ points } points</span></span>
+                            <span key={ index } className="Point-Summary"><span className="Dot" style={{ backgroundColor: Constants.Colors.Points[ index ].background }} ></span><span className="Points-Total">{ points } points</span></span>
                         )
                     })}
                 </div>

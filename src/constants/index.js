@@ -174,6 +174,7 @@ export const ReactMotion = {
     BTN_DAMPING: 7
 }
 
+
   /* TODO: move this later
         // Then, we assign centroids A and B random positions
         // To do that, we will get 2 distinct random points from the created points. We then find
