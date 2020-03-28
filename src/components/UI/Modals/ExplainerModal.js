@@ -31,10 +31,18 @@ class ExplainerModal extends Component {
         });
     }
 
+    goBackPage = () => {
+        this.setState({
+            currentPage: this.state.currentPage - 1
+        })
+    }
+
     render() {
         let modalContent;
         let btnLeftProps;
-        let btnClasses = Constants.Global.BUTTON_LEFT_CLASSES + " Modal-Right-Button"
+        let btnRightProps;
+        let btnLeftClasses = Constants.Global.BUTTON_LEFT_CLASSES
+        let btnRightClasses = Constants.Global.BUTTON_RIGHT_CLASSES + " Modal-Right-Button"
 
         if ( this.state.currentPage === 0 ) {
             modalContent =
@@ -46,14 +54,19 @@ class ExplainerModal extends Component {
     
             <div className="Modal-Section">
                 <h3>What Does K-Means Clustering Do?</h3>
-                <p>K-means clustering is used to group similar data points into clusters (groups). Similarity between points is given by their distance to a given cluster center (centroid).</p><br />
-                <p>Clusters are represented by different colors in the chart.</p>
+                <p>K-means clustering is used to group similar data points into clusters (groups). Points are similar if they're close to each other in the chart.</p><br />
             </div>
             </div>
 
             btnLeftProps = {
+                title: "",
+                classes: "hide",
+                clickFn: (()=>{})
+            }
+
+            btnRightProps = {
                 title: "Next",
-                classes: btnClasses,
+                classes: btnRightClasses,
                 clickFn: this.advancePage
             }
         } else if ( this.state.currentPage === 1 ) {
@@ -61,41 +74,50 @@ class ExplainerModal extends Component {
             <div>                 
             <div className="Modal-Section">
                 <h3>Initializing Data</h3>
-                <p>To start, 100 unassigned data points and K centroids (3 by default) are placed. You can shuffle this data as you see fit.</p>
+                <p>Data is initialized to 100 points and 3 clusters. You can shuffle this data as you see fit.</p>
             </div>
             <div className="Modal-Section">
                 <h3>Algorithm Steps</h3>
-                <p>The first step consists of assigning points to the closest centroid. The second step consists of re-calculating the average position of all centroids.</p><br />
-                <p>Once points stop switching clusters, the algorithm ends.</p>
+                <p>The first step consists of assigning points to the closest centroid. The second step consists of calculating the average position of each cluster and moving each centroid there.</p><br />
             </div>
             </div>
 
             btnLeftProps = {
+                title: "Back",
+                classes: btnLeftClasses,
+                clickFn: this.goBackPage
+            }
+
+            btnRightProps = {
                 title: "Next",
-                classes: btnClasses,
+                classes: btnRightClasses,
                 clickFn: this.advancePage
             }
         } else {
             modalContent =
             <div>                 
             <div className="Modal-Section">
-                <h3>Settings</h3>
-                <p>In the settings, you can change the points' distribution and the number of clusters to use.</p>
+                <h3>On Finishing</h3>
+                <p>The algorithm ends once points stop switching clusters.</p>
             </div>
 
             <div className="Modal-Section">
-            <h3>Managing Steps</h3>
-            <p>You can choose to perform a full step (assignment + repositioning) manually,  or you can have all steps complete automatically until the algorithm is done.</p>
+            <h3>Customizations</h3>
+            <p>In the settings panel, you can change the points' distribution and the number of clusters to use. Also, you can perform steps automatically or manually with the main buttons.</p> <br />
+            <p>Have fun clustering!</p>
             </div>
 
-            <div className="Modal-Section">
-                <h3>Have fun clustering!</h3>
-            </div>
             </div>
 
             btnLeftProps = {
+                title: "Back",
+                classes: btnLeftClasses,
+                clickFn: this.goBackPage
+            }
+
+            btnRightProps = {
                 title: "Let's go!",
-                classes: btnClasses,
+                classes: btnRightClasses,
                 clickFn: this.closeModal
             }
         }
@@ -126,6 +148,12 @@ class ExplainerModal extends Component {
 
 
                     <div className="Modal-Btn-Container">
+                        <Button
+                            title={ btnRightProps.title }
+                            className={ btnRightProps.classes }
+                            clicked={ btnRightProps.clickFn }
+                        />
+
                         <Button
                             title={ btnLeftProps.title }
                             className={ btnLeftProps.classes }

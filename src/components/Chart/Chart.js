@@ -6,6 +6,8 @@ import Button from '../UI/Button/Button';
 import { Motion, spring } from 'react-motion';
 import { connect } from 'react-redux';
 import * as actions from '../../store/actions/actions';
+import settingsLogo from '../../resources/images/settings-icon.png';
+// import settingsIcon from '../resources/images/settings-icon.png';
 /*
 import { BasicLottieComponent } from '../Lottie/LottieControl';
 import { Lottie } from '@crello/react-lottie';
@@ -28,6 +30,11 @@ class MyChart extends Component {
             type: "scatter",
             datasets: [],
             options: {
+                events: [ 'click' ],
+                tooltips: { 
+                    enabled: true,
+                    mode: 'point'
+                 },
                 legend: {
                     display: true,
                     position: 'top',
@@ -542,32 +549,27 @@ class MyChart extends Component {
             }
 
         return (
-            <div>            
-                <div className="Chart">
-                 <canvas 
-                    id="myChart"
-                    ref={this.chartRef}
-                    />
-                </div> 
+            <div>
+                <canvas id="myChart" ref={this.chartRef} />
                 <div className="Controls">
-                <span className="Column Left-Column">
-                    { leftColumnContent }
-                </span>
-                <span className="Column Middle-Column">
+                    <span className="Column Left-Column">
+                        { leftColumnContent }
+                    </span>
+                    <span className="Column Middle-Column">
 
-                { button1 }
-                { button2 }
-                </span>
+                    { button1 }
+                    { button2 }
+                    </span>
 
-                <span className="Column Right-Column">
-                    <Button
-                        className="Button SettingsButton"
-                        title="Settings"
-                        clicked={ this.showSettings }
-                        iconURL="https://image.flaticon.com/icons/svg/1790/1790042.svg"
-                        disabled={ this.props.isAutomatic && this.props.applicationState === Constants.ApplicationStates.STEPS }
-                    />
-                </span>
+                    <span className="Column Right-Column">
+                        <Button
+                            className="Button SettingsButton"
+                            title="Settings"
+                            clicked={ this.showSettings }
+                            iconURL={ settingsLogo }
+                            disabled={ this.props.isAutomatic && this.props.applicationState === Constants.ApplicationStates.STEPS }
+                        />
+                    </span>
                 </div>
             </div>
         );
@@ -575,20 +577,6 @@ class MyChart extends Component {
 }
 
 const mapStateToProps = state => {
-    /*
-
-     <BasicLottieComponent className="Finish-Lottie" />
-
-               
-
-                <div style={{ display: 'inline-block', position: 'relative', bottom: '40px', float: 'left' }}>
-                    <BasicLottieComponent />
-                </div>
-                <span style={{float: 'left', fontWeight: 'bold' }}>You did it! Try again?</span>
-
-
-    */
-
     return {
         applicationState: state.globalProps.applicationState,
         numOfClusters: state.globalProps.numOfClusters,
@@ -620,27 +608,3 @@ const mapDispatchToProps = dispatch => {
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(MyChart);
-
-/*
-<Scatter ref={ref => this.chartReference = ref} data={this.state} options={options} />
-https://www.youtube.com/watch?v=_aWzGGNrcic
-
-K-means clustering 
-
-Input: K (a set of points x1 ... xn)
-
-Steps:
-1) Place centroids c1...ck at random locations
-
-Repeat until convergence:
-    for each point xi:
-    a) find nearest centroid cj
-    b) assign the point xi to cluster j
-
-    for each cluster j = 1...K
-    c) new centroid cj = mean of all points xi assigned to cluster j in previous step
-
-
-
-
-*/
